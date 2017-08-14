@@ -1,0 +1,28 @@
+{
+  "name": "envato-api",
+  "version": "1.0.0",
+  "description": "Easily interact with the Envato Market API.",
+  "main": "main/api.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/baileyherbert/node-envato-api.git"
+  },
+  "author": {
+    "name": "Bailey Herbert",
+    "email": "hello@baileyherbert.com",
+    "url": "https://baileyherbert.com"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/baileyherbert/node-envato-api/issues"
+  },
+  "homepage": "https://github.com/baileyherbert/node-envato-api#readme",
+  "dependencies": {
+    "bluebird": "^3.5.0",
+    "request": "^2.81.0"
+  },
+  "keywords": [
+    "envato"
+  ],
+  "devDependencies": {}
+}

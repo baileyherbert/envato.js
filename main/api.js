@@ -67,34 +67,34 @@ function usePersonalToken(token, userAgent) {
 // Catalog
 Api.prototype.getCollection = makeRequest('/v3/market/catalog/collection');
 Api.prototype.getItem = makeRequest('/v3/market/catalog/item');
-Api.prototype.searchItems = makeRequest('/v1/discovery/search/search/item');
-Api.prototype.searchComments = makeRequest('/v1/discovery/search/search/comment');
-Api.prototype.getPopularItems = makeRequest('/v1/market/popular:%site.json');
-Api.prototype.getCategories = makeRequest('/v1/market/categories:%site.json');
-Api.prototype.getItemPrices = makeRequest('/v1/market/item-prices:%item_id.json');
-Api.prototype.getNewItems = makeRequest('/v1/market/new-files:%site,%category.json');
-Api.prototype.getFeaturedItems = makeRequest('/v1/market/features:%site.json');
-Api.prototype.getRandomNewFiles = makeRequest('/v1/market/random-new-files:%site.json');
+Api.prototype.searchItems = makeRequest('/v3/discovery/search/search/item');
+Api.prototype.searchComments = makeRequest('/v3/discovery/search/search/comment');
+Api.prototype.getPopularItems = makeRequest('/v3/market/popular:%site.json');
+Api.prototype.getCategories = makeRequest('/v3/market/categories:%site.json');
+Api.prototype.getItemPrices = makeRequest('/v3/market/item-prices:%item_id.json');
+Api.prototype.getNewItems = makeRequest('/v3/market/new-files:%site,%category.json');
+Api.prototype.getFeaturedItems = makeRequest('/v3/market/features:%site.json');
+Api.prototype.getRandomNewFiles = makeRequest('/v3/market/random-new-files:%site.json');
 
 // User details
 Api.prototype.getUserCollections = makeRequest('/v3/market/user/collections');
 Api.prototype.getPrivateCollection = makeRequest('/v3/market/user/collection');
-Api.prototype.getUsersDetails = makeRequest('/v1/market/user:%username.json');
-Api.prototype.getUsersBadges = makeRequest('/v1/market/user-badges:%username.json');
-Api.prototype.getUsersItems = makeRequest('/v1/market/user-items-by-site:%username.json');
-Api.prototype.getUsersNewItems = makeRequest('/v1/market/new-files-from-user:%username,%site.json');
+Api.prototype.getUsersDetails = makeRequest('/v3/market/user:%username.json');
+Api.prototype.getUsersBadges = makeRequest('/v3/market/user-badges:%username.json');
+Api.prototype.getUsersItems = makeRequest('/v3/market/user-items-by-site:%username.json');
+Api.prototype.getUsersNewItems = makeRequest('/v3/market/new-files-from-user:%username,%site.json');
 
 // Private user details
 Api.prototype.getSales = makeRequest('/v3/market/author/sales');
 Api.prototype.getSaleByCode = makeRequest('/v3/market/author/sale');
 Api.prototype.getPurchases = makeRequest('/v3/market/buyer/list-purchases');
 Api.prototype.getPurchaseByCode = makeRequest('/v3/market/buyer/purchase');
-Api.prototype.getPrivateUserDetails = makeRequest('/v1/market/private/user/account.json');
-Api.prototype.getUsername = makeRequest('/v1/market/private/user/username.json');
-Api.prototype.getEmail = makeRequest('/v1/market/private/user/email.json');
-Api.prototype.getSalesByMonth = makeRequest('/v1/market/private/user/earnings-and-sales-by-month.json');
-Api.prototype.getTotalMarketUsers = makeRequest('/v1/market/total-users.json');
-Api.prototype.getTotalMarketItems = makeRequest('/v1/market/total-items.json');
-Api.prototype.getTotalFilesBySite = makeRequest('/v1/market/number-of-files:%site.json');
+Api.prototype.getPrivateUserDetails = makeRequest('/v3/market/private/user/account.json');
+Api.prototype.getUsername = makeRequest('/v3/market/private/user/username.json');
+Api.prototype.getEmail = makeRequest('/v3/market/private/user/email.json');
+Api.prototype.getSalesByMonth = makeRequest('/v3/market/private/user/earnings-and-sales-by-month.json');
+Api.prototype.getTotalMarketUsers = makeRequest('/v3/market/total-users.json');
+Api.prototype.getTotalMarketItems = makeRequest('/v3/market/total-items.json');
+Api.prototype.getTotalFilesBySite = makeRequest('/v3/market/number-of-files:%site.json');
 
 module.exports = usePersonalToken;

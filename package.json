@@ -1,7 +1,7 @@
 {
     "name": "envato",
-    "version": "2.0.0",
-    "description": "Easily interact with the Envato Market API using a personal token.",
+    "version": "2.0.1",
+    "description": "Wrapper for the Envato API, with support for both personal tokens and OAuth.",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "scripts": {

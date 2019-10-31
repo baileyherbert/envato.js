@@ -1,4 +1,18 @@
-# Envato.js
+[![Envato.js](https://i.bailey.sh/pAEYtWD.png)](https://www.npmjs.com/packages/envato)
+
+<p align="center">
+  <a aria-label="Build" href="https://travis-ci.org/baileyherbert/envato.js">
+    <img alt="" src="https://img.shields.io/travis/baileyherbert/envato.js?style=for-the-badge&labelColor=000000">
+  </a>
+  <a aria-label="NPM version" href="https://www.npmjs.com/package/envato">
+    <img alt="" src="https://img.shields.io/npm/v/envato.svg?style=for-the-badge&labelColor=000000">
+  </a>
+  <a aria-label="License" href="https://github.com/baileyherbert/envato.js/blob/master/LICENSE">
+    <img alt="" src="https://img.shields.io/npm/l/envato.svg?style=for-the-badge&labelColor=000000">
+  </a>
+</p>
+
+---
 
 This is a wrapper for the new Envato API. It parses responses and conveniently returns the exact data you're looking for. It also offers:
 
@@ -7,7 +21,64 @@ This is a wrapper for the new Envato API. It parses responses and conveniently r
 - Simple error handling.
 - Full type hinting and autocompletion.
 
-This library will work in modern browsers. If you need to support older browsers, consider using a bundler such as Webpack with Babel.
+It also works in modern browsers. If you need to support older browsers, consider using a bundler such as Webpack with Babel.
+
+---
+
+- [Basic usage](#basic-usage)
+- [Creating a client](#creating-a-client)
+  - [Personal token](#personal-token)
+  - [OAuth](#oauth)
+  - [Client options](#client-options)
+    - [User agent](#user-agent)
+    - [Request options](#request-options)
+- [Sending requests](#sending-requests)
+  - [Using promises](#using-promises)
+  - [Getting a user's identity](#getting-a-users-identity)
+  - [Manually sending requests](#manually-sending-requests)
+  - [Catalog](#catalog)
+    - [Look up a public collection](#look-up-a-public-collection)
+    - [Look up a single item](#look-up-a-single-item)
+    - [Look up a WordPress theme or plugin's version](#look-up-a-wordpress-theme-or-plugins-version)
+    - [Search for items](#search-for-items)
+    - [Search for comments](#search-for-comments)
+    - [Get popular items by site](#get-popular-items-by-site)
+    - [Get categories by site](#get-categories-by-site)
+    - [Get prices for an item](#get-prices-for-an-item)
+    - [Get new items by site and category](#get-new-items-by-site-and-category)
+    - [Find featured items and authors](#find-featured-items-and-authors)
+    - [Get random new items](#get-random-new-items)
+  - [User](#user)
+    - [List a user's collections](#list-a-users-collections)
+    - [Look up a user's private collection](#look-up-a-users-private-collection)
+    - [Get a user's profile details](#get-a-users-profile-details)
+    - [List a user's badges](#list-a-users-badges)
+    - [Get a user's item count per marketplace](#get-a-users-item-count-per-marketplace)
+    - [Get a user's newest items](#get-a-users-newest-items)
+  - [Private user](#private-user)
+    - [List an author's sales](#list-an-authors-sales)
+    - [Look up a sale by code](#look-up-a-sale-by-code)
+    - [List all purchases](#list-all-purchases)
+    - [List a buyer's purchases](#list-a-buyers-purchases)
+    - [Look up a purchase by code](#look-up-a-purchase-by-code)
+    - [Get a user's account details](#get-a-users-account-details)
+    - [Get a user's username](#get-a-users-username)
+    - [Get a user's email](#get-a-users-email)
+    - [Get an author's monthly sales](#get-an-authors-monthly-sales)
+    - [Get statement data](#get-statement-data)
+    - [Download a purchase](#download-a-purchase)
+  - [Statistics](#statistics)
+    - [Get the total number of market users](#get-the-total-number-of-market-users)
+    - [Get the total number of market items](#get-the-total-number-of-market-items)
+    - [Get the number of items per category](#get-the-number-of-items-per-category)
+- [Error handling](#error-handling)
+  - [Error codes](#error-codes)
+  - [Not found errors](#not-found-errors)
+- [Events](#events)
+  - [Renew](#renew)
+  - [Debug](#debug)
+
+---
 
 ## Basic usage
 
@@ -28,7 +99,7 @@ const Envato = require('envato');
     let { userId } = await client.getIdentity();
     let username = await client.private.getUsername();
     let email = await client.private.getEmail();
-    
+
     console.log('Logged in:', userId, username, email);
 })();
 ```
@@ -70,11 +141,11 @@ Once the user returns from a successful authentication, the current URL should c
 ```js
 app.get('/authenticate', async function(req, res) {
     let code = req.query.code;
-    
+
     try {
     	let client = await oauth.getClient(code);
         let username = await client.private.getUsername();
-        
+
         res.send(`Hello, ${username}!`);
     }
     catch (error) {
@@ -191,7 +262,7 @@ Scopes: [
 
 ### Manually sending requests
 
-The client exposes several different methods for sending requests (one for each of get, post, put, patch, and delete). 
+The client exposes several different methods for sending requests (one for each of get, post, put, patch, and delete).
 
 In the example below, we send a `POST` request to `/v3/path/to/endpoint` with the `params` object as our encoded form body. The return value is a parsed object.
 
@@ -229,7 +300,7 @@ let items = response.items;
 
 #### Look up a single item
 
-Returns all details of a particular item on Envato Market. 
+Returns all details of a particular item on Envato Market.
 
 ```js
 let item = await client.catalog.getItem(123456);

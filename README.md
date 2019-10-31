@@ -1,4 +1,4 @@
-[![Envato.js](https://i.bailey.sh/pAEYtWD.png)](https://www.npmjs.com/packages/envato)
+[![Envato.js](https://i.bailey.sh/pAEYtWD.png)](https://github.com/baileyherbert/envato.js)
 
 <p align="center">
   <a aria-label="Build" href="https://travis-ci.org/baileyherbert/envato.js">

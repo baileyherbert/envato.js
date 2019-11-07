@@ -49,7 +49,7 @@ describe('personal client', () => {
     });
 
     beforeEach((done) => {
-        setTimeout(done, 1000);
+        setTimeout(done, 3000);
     });
 
     it('can retrieve identity', async () => {
@@ -74,7 +74,7 @@ describe('personal client', () => {
 
             expect(collection.collection.name).to.equal('Free Files of the Month');
             expect(collection.items).length.to.be.greaterThan(1);
-            expect(collection.items[0].number_of_sales).to.be.greaterThan(0);
+            expect(collection.items[0].number_of_sales).to.be.a('number');
         });
 
         it('can retrieve an item', async () => {

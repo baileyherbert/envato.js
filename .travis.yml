@@ -5,3 +5,5 @@ node_js:
   - "10"
   - "12"
   - "13"
+before_script:
+  - npm run build

@@ -80,7 +80,7 @@ export class Client extends EventEmitter {
      * Returns the identity of the current token, which includes the account id, a list of all granted permissions, and
      * the number of seconds until the token expires.
      */
-    public async getIdentity() {
+    public getIdentity() {
         return this.get<IdentityResponse>('/whoami');
     }
 

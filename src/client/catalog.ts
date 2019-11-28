@@ -15,8 +15,8 @@ export class CatalogClientGroup {
      * @param id The numeric ID of the collection to return.
      * @param page Page number.
      */
-    public async getCollection(id: number, page?: number) {
-        return await this.client.get<GetCollectionResponse>(url.build('/v3/market/catalog/collection', {
+    public getCollection(id: number, page?: number) {
+        return this.client.get<GetCollectionResponse>(url.build('/v3/market/catalog/collection', {
             id, page
         }));
     }
@@ -26,8 +26,8 @@ export class CatalogClientGroup {
      *
      * @param id The numeric ID of the item to return.
      */
-    public async getItem(id: number) {
-        return await this.client.get<GetItemResponse>(url.build('/v3/market/catalog/item', {
+    public getItem(id: number) {
+        return this.client.get<GetItemResponse>(url.build('/v3/market/catalog/item', {
             id
         }));
     }
@@ -39,8 +39,8 @@ export class CatalogClientGroup {
      *
      * @param id The numeric ID of the item to return.
      */
-    public async getItemVersion(id: number) {
-        return await this.client.get<GetItemVersionResponse>(url.build('/v3/market/catalog/item-version', {
+    public getItemVersion(id: number) {
+        return this.client.get<GetItemVersionResponse>(url.build('/v3/market/catalog/item-version', {
             id
         }));
     }
@@ -48,15 +48,15 @@ export class CatalogClientGroup {
     /**
      * @param options The search options.
      */
-    public async searchItems(options: SearchItemsOptions = {}) {
-        return await this.client.get<SearchItemsResponse>(url.build('/v1/discovery/search/search/item', options));
+    public searchItems(options: SearchItemsOptions = {}) {
+        return this.client.get<SearchItemsResponse>(url.build('/v1/discovery/search/search/item', options));
     }
 
     /**
      * @param options The search options.
      */
-    public async searchComments(options: SearchCommentsOptions) {
-        return await this.client.get<SearchCommentsResponse>(url.build('/v1/discovery/search/search/comment', options));
+    public searchComments(options: SearchCommentsOptions) {
+        return this.client.get<SearchCommentsResponse>(url.build('/v1/discovery/search/search/comment', options));
     }
 
     /**

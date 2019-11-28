@@ -24,8 +24,8 @@ export class UserClientGroup {
      *
      * @param id The numeric ID of the collection to return.
      */
-    public async getPrivateCollection(id: number) {
-        return await this.client.get<GetPrivateCollectionResponse>(url.build('/v3/market/user/collection', {
+    public getPrivateCollection(id: number) {
+        return this.client.get<GetPrivateCollectionResponse>(url.build('/v3/market/user/collection', {
             id
         }));
     }

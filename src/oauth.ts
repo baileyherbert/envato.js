@@ -73,7 +73,7 @@ export class OAuth {
      *
      * @param client The client whose access token needs to be renewed.
      */
-    public async renew(client: Client) : Promise<RefreshedToken> {
+    public renew(client: Client) : Promise<RefreshedToken> {
         return new Promise((resolve, reject) => {
             request.post('https://api.envato.com/token', Object.assign({}, this.options.request || {}, {
                 form: {

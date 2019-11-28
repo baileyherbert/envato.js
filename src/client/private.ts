@@ -15,8 +15,8 @@ export class PrivateClientGroup {
      *
      * @param page A page number to start the results from.
      */
-    public async getSales(page?: number) {
-        return await this.client.get<GetSalesResponse>(url.build('/v3/market/author/sales', {
+    public getSales(page?: number) {
+        return this.client.get<GetSalesResponse>(url.build('/v3/market/author/sales', {
             page
         }));
     }
@@ -27,8 +27,8 @@ export class PrivateClientGroup {
      *
      * @param code The unique code of the sale to return.
      */
-    public async getSale(code: string) {
-        return await this.client.get<GetSaleResponse>(url.build('/v3/market/author/sale', {
+    public getSale(code: string) {
+        return this.client.get<GetSaleResponse>(url.build('/v3/market/author/sale', {
             code
         }));
     }
@@ -38,8 +38,8 @@ export class PrivateClientGroup {
      *
      * @param code The unique code of the sale to return.
      */
-    public async getPurchases(options: GetPurchasesOptions) {
-        return await this.client.get<GetPurchasesResponse>(url.build('/v3/market/buyer/list-purchases', options));
+    public getPurchases(options: GetPurchasesOptions) {
+        return this.client.get<GetPurchasesResponse>(url.build('/v3/market/buyer/list-purchases', options));
     }
 
     /**
@@ -48,8 +48,8 @@ export class PrivateClientGroup {
      *
      * @param page A page number to start the results from.
      */
-    public async getPurchasesFromAppCreator(page ?: number) {
-        return await this.client.get<GetPurchasesFromAppCreatorResponse>(url.build('/v3/market/buyer/purchases', {
+    public getPurchasesFromAppCreator(page ?: number) {
+        return this.client.get<GetPurchasesFromAppCreatorResponse>(url.build('/v3/market/buyer/purchases', {
             page
         }));
     }
@@ -60,8 +60,8 @@ export class PrivateClientGroup {
      * @param code The unique code of the purchase to return.
      * @deprecated The `purchase:history` permission is deprecated, please use `purchase:verify` instead.
      */
-    public async getPurchase(code: string) {
-        return await this.client.get<GetPurchaseResponse>(url.build('/v3/market/buyer/purchase', {
+    public getPurchase(code: string) {
+        return this.client.get<GetPurchaseResponse>(url.build('/v3/market/buyer/purchase', {
             code
         }));
     }
@@ -111,8 +111,8 @@ export class PrivateClientGroup {
     /**
      * Lists transactions from the user's statement page.
      */
-    public async getStatement(options: GetStatementOptions) {
-        return await this.client.get<GetStatementResponse>(url.build('/v3/market/user/statement', options));
+    public getStatement(options: GetStatementOptions) {
+        return this.client.get<GetStatementResponse>(url.build('/v3/market/user/statement', options));
     }
 
     /**

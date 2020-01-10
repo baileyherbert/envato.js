@@ -95,6 +95,7 @@ export class OAuth {
                 if (!data.token_type) return reject(new Error('Unexpected response from API when renewing token: \n' + body));
 
                 resolve({
+                    token: data.access_token,
                     access_token: data.access_token,
                     expiration: (new Date()).getTime() + (data.expires_in * 1000) - 1000
                 });
@@ -155,6 +156,7 @@ type RefreshResponseData = {
 };
 
 export type RefreshedToken = {
-    access_token: string;
+    token: string;
     expiration: number;
+    [key: string]: any;
 };

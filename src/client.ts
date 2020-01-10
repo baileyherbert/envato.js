@@ -4,20 +4,47 @@ import { CatalogClientGroup } from './client/catalog';
 import { PrivateClientGroup } from './client/private';
 import { StatsClientGroup } from './client/stats';
 import { UserClientGroup } from './client/user';
-import { BadRequestError, ErrorResponse, AccessDeniedError, UnauthorizedError, ServerError, NotFoundError, HttpError, TooManyRequestsError } from './errors/http';
 import { OAuth, RefreshedToken } from './oauth';
 import { EventEmitter } from 'events';
+import * as Errors from './errors/http';
 
 export class Client extends EventEmitter {
 
+    /**
+     * @internal
+     */
     private _catalog : CatalogClientGroup;
+
+    /**
+     * @internal
+     */
     private _private: PrivateClientGroup;
+
+    /**
+     * @internal
+     */
     private _stats: StatsClientGroup;
+
+    /**
+     * @internal
+     */
     private _user: UserClientGroup;
 
-    public constructor(private options: ClientOptions) {
+    /**
+     * @internal
+     */
+    private options : ClientOptions;
+
+    public constructor(token: string);
+    public constructor(options: ClientOptions);
+    public constructor(tokenOrOptions: ClientOptions | string) {
         super();
 
+        if (typeof tokenOrOptions === 'string') {
+            tokenOrOptions = { token: tokenOrOptions };
+        }
+
+        this.options = tokenOrOptions;
         this._catalog = new CatalogClientGroup(this);
         this._private = new PrivateClientGroup(this);
         this._stats = new StatsClientGroup(this);
@@ -163,13 +190,14 @@ export class Client extends EventEmitter {
 
     /**
      * Fetches the path via the given method.
+     * @internal
      */
     protected fetch<T>(method: string, path: string, form ?: { [name: string]: any }) : Promise<T> {
         return new Promise(async (resolve, reject) => {
             if (this.expired && this.options.oauth && this.options.refreshToken) {
                 let refresh = await this.options.oauth.renew(this);
 
-                this.options.token = refresh.access_token;
+                this.options.token = refresh.token;
                 this.options.expiration = refresh.expiration;
 
                 this.emit('renew', refresh);
@@ -189,6 +217,7 @@ export class Client extends EventEmitter {
 
     /**
      * Returns an absolute URL to the API with the given path.
+     * @internal
      */
     private uri(path: string) {
         return 'https://api.envato.com/' + path.replace(/^\/+/, '');
@@ -196,6 +225,7 @@ export class Client extends EventEmitter {
 
     /**
      * Handles a response from the API, properly throwing errors or parsing the response as appropriate.
+     * @internal
      */
     private handleResponse(err: any, response: request.Response, body: any, resolve: Function, reject: Function) {
         this.emit('debug', err, response, body);
@@ -203,13 +233,13 @@ export class Client extends EventEmitter {
         if (err) return reject(err);
         if (response.statusCode !== 200) {
             switch (response.statusCode) {
-                case 400: return reject(new BadRequestError(this.getErrorResponse(body)));
-                case 401: return reject(new UnauthorizedError(this.getErrorResponse(body)));
-                case 403: return reject(new AccessDeniedError(this.getErrorResponse(body)));
-                case 404: return reject(new NotFoundError(this.getErrorResponse(body)));
-                case 429: return reject(new TooManyRequestsError(this.getErrorResponse(body)));
-                case 500: return reject(new ServerError(this.getErrorResponse(body)));
-                default: reject(new HttpError('Unknown error', response.statusCode, this.getErrorResponse(body)));
+                case 400: return reject(new Errors.BadRequestError(this.getErrorResponse(body)));
+                case 401: return reject(new Errors.UnauthorizedError(this.getErrorResponse(body)));
+                case 403: return reject(new Errors.AccessDeniedError(this.getErrorResponse(body)));
+                case 404: return reject(new Errors.NotFoundError(this.getErrorResponse(body)));
+                case 429: return reject(new Errors.TooManyRequestsError(this.getErrorResponse(body)));
+                case 500: return reject(new Errors.ServerError(this.getErrorResponse(body)));
+                default: reject(new Errors.HttpError('Unknown error', response.statusCode, this.getErrorResponse(body)));
             }
         }
 
@@ -223,8 +253,9 @@ export class Client extends EventEmitter {
 
     /**
      * Returns an `ErrorResponse` instance from the given response body.
+     * @internal
      */
-    private getErrorResponse(body: any) : ErrorResponse {
+    private getErrorResponse(body: any) : Errors.ErrorResponse {
         if (typeof body == 'string') {
             try {
                 return JSON.parse(body);

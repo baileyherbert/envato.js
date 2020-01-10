@@ -1,9 +1,9 @@
 {
     "name": "envato",
-    "version": "2.0.1",
-    "description": "Wrapper for the Envato API, with support for both personal tokens and OAuth.",
+    "version": "2.1.0",
+    "description": "Library for the Envato API, with support for both personal tokens and OAuth.",
     "main": "dist/index.js",
-    "types": "dist/index.d.ts",
+    "types": "index.d.ts",
     "scripts": {
         "build": "tsc",
         "test": "mocha --timeout 10000"

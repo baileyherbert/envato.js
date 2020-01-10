@@ -38,17 +38,63 @@ export type Item = {
     trending: boolean;
     tags: string[];
     previews: {
-        icon_preview ?: {
+        thumbnail_preview ?: {
+            small_url: string;
+            large_url: string;
+            large_width: number;
+            large_height: number;
+        },
+        icon_with_thumbnail_preview ?: {
             icon_url: string;
-            type: string;
+            thumbnail_url: string;
+            thumbnail_width: number;
+            thumbnail_height: number;
+        },
+        icon_with_landscape_preview ?: {
+            icon_url: string;
+            landscape_url: string;
+        },
+        icon_with_square_preview ?: {
+            icon_url: string;
+            square_url: string;
+            image_urls: Image[];
+        },
+        icon_with_audio_preview ?: {
+            icon_url: string;
+            mp3_url: string;
+            mp3_preview_download_url ?: string;
+            mp3_id: string;
+            length: {
+                hours: number;
+                minutes: number;
+                seconds: number;
+            };
         },
         icon_with_video_preview ?: {
             icon_url: string;
             landscape_url: string;
             video_url: string;
             type: string;
+        },
+        live_site ?: {
+            url: string;
+        },
+        icon_preview ?: {
+            icon_url: string;
+            type: string;
+        },
+        landscape_preview ?: {
+            landscape_url: string;
+            image_urls ?: Image[];
         }
     }
+};
+
+export type Image = {
+    name ?: string;
+    url: string;
+    width: number;
+    height: number;
 };
 
 export type ItemShort = {

@@ -14,14 +14,13 @@
 
 ---
 
-This is a wrapper for the new Envato API. It parses responses and conveniently returns the exact data you're looking for. It also offers:
+This is a library for working with the new Envato API.
 
 - Supports both OAuth and personal tokens.
 - Automatic renewal of OAuth access tokens.
 - Simple error handling.
 - Full type hinting and autocompletion.
-
-It also works in modern browsers. If you need to support older browsers, consider using a bundler such as Webpack with Babel.
+- Works in modern browsers.
 
 ---
 
@@ -113,9 +112,7 @@ Before you can send requests, you must create a client instance with your person
 You can create a client from a personal token by passing the `token` parameter into the client options.
 
 ```js
-const client = new Envato.Client({
-    token: 'your personal token'
-});
+const client = new Envato.Client('your personal token');
 ```
 
 ### OAuth
@@ -171,7 +168,7 @@ let client = new Envato.Client({
     token: database.load('token'),
     refreshToken: database.load('refreshToken'),
     expiration: database.load('expiration'),
-    oauth: new Envato.OAuth() // or use an existing instance
+    oauth: new Envato.OAuth() // oauth instance must have the client_id and client_secret set
 });
 ```
 
@@ -229,9 +226,19 @@ Note that the return values from this wrapper won't always perfectly match the r
 
 ### Using promises
 
-The code samples in this documentation use the `await` operator for simplicity and convenience. If you need to use promises the old fashioned way, then it will look like this:
+The code samples in this documentation use the `await` operator for simplicity and convenience. However, you can still use promises the old-fashioned way if you'd like:
 
 ```js
+// With await operator
+try {
+    let username = await client.private.getUsername();
+    console.log(`Hello, ${username}!`);
+}
+catch (error) {
+    console.error('Failed to get username:', error.message, error.response);
+}
+
+// With classic promises
 client.private.getUsername().then(function(username) {
     console.log(`Hello, ${username}!`);
 }).catch(function(error) {
@@ -691,11 +698,11 @@ The client exposes two events that you can listen to using the `on()` method.
 
 ### Renew
 
-This event is triggered whenever the client generates a new access token due to the previous token becoming expired. This only applies to clients using OAuth.
+This event is triggered whenever the client generates a new access token due to the previous token becoming expired. The refresh token always stays the same. This only applies to clients using OAuth.
 
 ```js
 client.on('renew', function(data) {
-    let accessToken = data.access_token;
+    let newAccessToken = data.token;
     let expiration = data.expiration;
 });
 ```

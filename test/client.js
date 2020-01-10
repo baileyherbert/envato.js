@@ -41,6 +41,13 @@ describe('client', () => {
             expect(error).to.be.instanceOf(UnauthorizedError);
         }
     });
+
+    // Short instantiation
+    let shortClient = new Client('a');
+
+    it('properly supports short instantiation', () => {
+        equal(shortClient.token, 'a');
+    });
 });
 
 describe('personal client', () => {

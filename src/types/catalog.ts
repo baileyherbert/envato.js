@@ -20,6 +20,7 @@ export type Item = {
     updated_at: string;
     attributes: Attribute[];
     description: string;
+    description_html: string;
     site: MarketDomain,
     classification: string;
     classification_url: string;

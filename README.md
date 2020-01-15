@@ -16,11 +16,16 @@
 
 This is a library for working with the new Envato API.
 
+- Methods available for all endpoints at [build.envato.com](https://build.envato.com/).
 - Supports both OAuth and personal tokens.
 - Automatic renewal of OAuth access tokens.
 - Simple error handling.
 - Full type hinting and autocompletion.
 - Works in modern browsers.
+
+Envato.js is not a wrapper over the Envato API. The return types in this library don't perfectly match
+the responses sent by the API. Instead, Envato.js extracts the relevant information from the responses and returns them
+without any extra bloat. It also converts data where possible, such as converting timestamps into `Date` objects.
 
 ---
 

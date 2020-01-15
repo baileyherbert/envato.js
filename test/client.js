@@ -56,7 +56,7 @@ describe('personal client', () => {
     });
 
     beforeEach((done) => {
-        setTimeout(done, 3000);
+        setTimeout(done, 1000);
     });
 
     it('can retrieve identity', async () => {
@@ -89,6 +89,7 @@ describe('personal client', () => {
 
             expect(item.number_of_sales).to.be.greaterThan(0);
             expect(item.author_username).to.equal('ThemeFusion');
+            expect(item.updated_at).to.be.instanceOf(Date, 'failed to parse timestamp into date object');
         });
 
         it('can retrieve market categories', async () => {
@@ -123,6 +124,8 @@ describe('personal client', () => {
             expect(sale).to.have.property('buyer');
             expect(sale).to.have.nested.property('item.id');
             expect(sale.purchase_count).to.be.a('number');
+            expect(sale.sold_at).to.be.instanceOf(Date, 'failed to parse timestamp into date object');
+            expect(sale.supported_until).to.be.instanceOf(Date, 'failed to parse timestamp into date object');
         });
 
         it('returns undefined when looking up an invalid purchase code', async () => {

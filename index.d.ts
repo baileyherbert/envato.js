@@ -4,7 +4,7 @@ import request = require('request');
 import events = require('events');
 
 declare namespace envato {
-    class Client extends events.EventEmitter {
+    class Client {
         constructor(token: string);
         constructor(options: ClientOptions);
 
@@ -114,6 +114,9 @@ declare namespace envato {
 
         on(event: 'debug', listener: (err: Error | undefined, response: request.Response, body: string) => void): this;
         on(event: 'renew', listener: (data: RefreshedToken) => void): this;
+
+        once(event: 'debug', listener: (err: Error | undefined, response: request.Response, body: string) => void): this;
+        once(event: 'renew', listener: (data: RefreshedToken) => void): this;
     }
 
     interface ClientOptions {
@@ -189,6 +192,10 @@ declare namespace envato {
     class OAuth {
         private options;
         constructor(options: OAuthOptions);
+
+        /**
+         * Returns the configured redirect URL.
+         */
         getRedirectUrl(): string;
 
         /**

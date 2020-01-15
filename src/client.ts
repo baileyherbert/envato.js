@@ -244,7 +244,15 @@ export class Client extends EventEmitter {
         }
 
         try {
-            return resolve(JSON.parse(body));
+            return resolve(JSON.parse(body, (key, value) => {
+                let date !: Date;
+
+                if ((key.endsWith('_at') || key.endsWith('_until')) && value) date = new Date(value);
+                else if ((key === 'month' || key === 'date') && value) date = new Date(value);
+
+                if (date && date.toString() !== 'Invalid Date') return date;
+                return value;
+            }));
         }
         catch (error) {
             throw new Error(`Failed to parse response: ${error.message}`);

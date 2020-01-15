@@ -1,6 +1,6 @@
 {
     "name": "envato",
-    "version": "2.1.0",
+    "version": "2.2.0",
     "description": "Library for the Envato API, with support for both personal tokens and OAuth.",
     "main": "dist/index.js",
     "types": "index.d.ts",

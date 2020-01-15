@@ -574,7 +574,7 @@ declare namespace envato {
         /**
          * The month as a timestamp (format: `"Mon Apr 01 00:00:00 +1100 2013"`).
          */
-        month: string;
+        month: Date;
         /**
          * The number of sales for this month as an unformatted integer in a string.
          */
@@ -589,7 +589,7 @@ declare namespace envato {
         count: number;
         results: {
             unique_id: string;
-            date: string;
+            date: Date;
             order_id?: number;
             type: string;
             detail: string;
@@ -790,7 +790,7 @@ declare namespace envato {
         author_username: string;
         author_url: string;
         url: string;
-        updated_at: string;
+        updated_at: Date;
         attributes: Attribute[];
         description: string;
         description_html: string;
@@ -808,7 +808,7 @@ declare namespace envato {
         };
         rating: number;
         rating_count: number;
-        published_at: string;
+        published_at: Date;
         trending: boolean;
         tags: string[];
         previews: {
@@ -885,7 +885,7 @@ declare namespace envato {
 
     type ItemMedium = ItemShort & {
         uploaded_on: string;
-        last_update: string;
+        last_update: Date;
         tags: string;
         category: string;
         live_preview_url: string;
@@ -1117,7 +1117,7 @@ declare namespace envato {
         site: string;
         item_author_id: string;
         item_author_url: string;
-        last_comment_at: string;
+        last_comment_at: Date;
         conversation: ItemConversation[];
         total_converstations: string;
         buyer_and_author: string;
@@ -1128,7 +1128,7 @@ declare namespace envato {
         id: string;
         username: string;
         content: string;
-        created_at: string;
+        created_at: Date;
         author_comment: boolean;
         hidden_by_complaint: boolean;
         complaint_state: 'no_complaint' | 'ignored' | 'ignored_with_edit' | 'pending' | 'upheld';
@@ -1140,10 +1140,10 @@ declare namespace envato {
 
     type Sale = {
         amount: string;
-        sold_at: string;
+        sold_at: Date;
         license: string;
         support_amount: string;
-        supported_until: string;
+        supported_until: Date | null;
         item: Item;
     };
 

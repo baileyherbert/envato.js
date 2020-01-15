@@ -2,10 +2,10 @@ import { Item } from './catalog';
 
 export type Sale = {
     amount: string;
-    sold_at: string;
+    sold_at: Date;
     license: string;
     support_amount: string;
-    supported_until: string;
+    supported_until: Date;
     item: Item;
 };
 

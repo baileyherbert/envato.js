@@ -186,7 +186,7 @@ export type GetMonthlySalesResponse = {
     /**
      * The month as a timestamp (format: `"Mon Apr 01 00:00:00 +1100 2013"`).
      */
-    month: string;
+    month: Date;
 
     /**
      * The number of sales for this month as an unformatted integer in a string.
@@ -203,7 +203,7 @@ export type GetStatementResponse = {
     count: number;
     results: {
         unique_id: string;
-        date: string;
+        date: Date;
         order_id ?: number;
         type: string;
         detail: string;

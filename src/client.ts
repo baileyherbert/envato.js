@@ -247,7 +247,7 @@ export class Client extends EventEmitter {
             return resolve(JSON.parse(body, (key, value) => {
                 let date !: Date;
 
-                if ((key.endsWith('_at') || key.endsWith('_until')) && value) date = new Date(value);
+                if ((key.endsWith('_at') || key.endsWith('_until') || key.startsWith('last_')) && value) date = new Date(value);
                 else if ((key === 'month' || key === 'date') && value) date = new Date(value);
 
                 if (date && date.toString() !== 'Invalid Date') return date;

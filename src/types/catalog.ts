@@ -17,7 +17,7 @@ export type Item = {
     author_username: string;
     author_url: string;
     url: string;
-    updated_at: string;
+    updated_at: Date;
     attributes: Attribute[];
     description: string;
     description_html: string;
@@ -35,7 +35,7 @@ export type Item = {
     }
     rating: number;
     rating_count: number;
-    published_at: string;
+    published_at: Date;
     trending: boolean;
     tags: string[];
     previews: {
@@ -112,7 +112,7 @@ export type ItemShort = {
 
 export type ItemMedium = ItemShort & {
     uploaded_on: string;
-    last_update: string;
+    last_update: Date;
     tags: string;
     category: string;
     live_preview_url: string;
@@ -344,7 +344,7 @@ export type ItemComment = {
     site: string;
     item_author_id: string;
     item_author_url: string;
-    last_comment_at: string;
+    last_comment_at: Date;
     conversation: ItemConversation[];
     total_converstations: string;
     buyer_and_author: string;
@@ -355,7 +355,7 @@ export type ItemConversation = {
     id: string;
     username: string;
     content: string;
-    created_at: string;
+    created_at: Date;
     author_comment: boolean;
     hidden_by_complaint: boolean;
     complaint_state: 'no_complaint' | 'ignored' | 'ignored_with_edit' | 'pending' | 'upheld';

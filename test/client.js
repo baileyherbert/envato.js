@@ -125,13 +125,13 @@ describe('personal client', () => {
             expect(sale.purchase_count).to.be.a('number');
         });
 
-        it('throws not found when looking up an invalid purchase code', async () => {
+        it('returns undefined when looking up an invalid purchase code', async () => {
             try {
-                await client.private.getSale('this-does-not-exist');
-                fail('The erroneous request did not throw an error');
+                let res = await client.private.getSale('this-does-not-exist');
+                expect(res).to.equal(undefined);
             }
             catch (error) {
-                expect(error).to.be.instanceOf(NotFoundError);
+                expect.fail('unexpectedly threw an error ' + error.toString());
             }
         });
 

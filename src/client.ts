@@ -239,7 +239,7 @@ export class Client extends EventEmitter {
                 case 404: return reject(new Errors.NotFoundError(this.getErrorResponse(body)));
                 case 429: return reject(new Errors.TooManyRequestsError(this.getErrorResponse(body)));
                 case 500: return reject(new Errors.ServerError(this.getErrorResponse(body)));
-                default: reject(new Errors.HttpError('Unknown error', response.statusCode, this.getErrorResponse(body)));
+                default: return reject(new Errors.HttpError('Unknown error', response.statusCode, this.getErrorResponse(body)));
             }
         }
 
@@ -255,15 +255,13 @@ export class Client extends EventEmitter {
      * Returns an `ErrorResponse` instance from the given response body.
      * @internal
      */
-    private getErrorResponse(body: any) : Errors.ErrorResponse {
+    private getErrorResponse(body: any) : Errors.ErrorResponse | undefined {
         if (typeof body == 'string') {
             try {
                 return JSON.parse(body);
             }
             catch (error) {
-                return {
-                    error: body
-                };
+                return undefined;
             }
         }
 

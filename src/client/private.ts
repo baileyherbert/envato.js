@@ -4,6 +4,7 @@ import { MarketDomain } from '../types/market';
 
 import * as url from '../util/url';
 import * as mutate from '../util/mutate';
+import * as errors from '../util/errors';
 
 export class PrivateClientGroup {
 
@@ -23,14 +24,15 @@ export class PrivateClientGroup {
 
     /**
      * Returns the details of an author's sale identified by the purchase code. Author sales data ("Amount") is reported
-     * before subtraction of any income taxes (eg US Royalty Withholding Tax).
+     * before subtraction of any income taxes (eg US Royalty Withholding Tax). Returns `undefined` if no matching sale
+     * is found.
      *
      * @param code The unique code of the sale to return.
      */
     public getSale(code: string) {
-        return this.client.get<GetSaleResponse>(url.build('/v3/market/author/sale', {
+        return errors.find(this.client.get<GetSaleResponse>(url.build('/v3/market/author/sale', {
             code
-        }));
+        })));
     }
 
     /**
@@ -55,15 +57,16 @@ export class PrivateClientGroup {
     }
 
     /**
-     * Returns the details of a user's purchase identified by the purchase code.
+     * Returns the details of a user's purchase identified by the purchase code. Returns `undefined` if no matching
+     * purchase is found.
      *
      * @param code The unique code of the purchase to return.
      * @deprecated The `purchase:history` permission is deprecated, please use `purchase:verify` instead.
      */
     public getPurchase(code: string) {
-        return this.client.get<GetPurchaseResponse>(url.build('/v3/market/buyer/purchase', {
+        return errors.find(this.client.get<GetPurchaseResponse>(url.build('/v3/market/buyer/purchase', {
             code
-        }));
+        })));
     }
 
     /**

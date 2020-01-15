@@ -4,6 +4,7 @@ import { MarketName } from '../types/market';
 
 import * as url from '../util/url';
 import * as mutate from '../util/mutate';
+import * as errors from '../util/errors';
 
 export class UserClientGroup {
 
@@ -20,14 +21,15 @@ export class UserClientGroup {
     }
 
     /**
-     * Returns details and items for public or the user's private collections.
+     * Returns details and items for public or the user's private collections. Returns `undefined` if the specified
+     * collection is not found.
      *
      * @param id The numeric ID of the collection to return.
      */
     public getPrivateCollection(id: number) {
-        return this.client.get<GetPrivateCollectionResponse>(url.build('/v3/market/user/collection', {
+        return errors.find(this.client.get<GetPrivateCollectionResponse>(url.build('/v3/market/user/collection', {
             id
-        }));
+        })));
     }
 
     /**

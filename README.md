@@ -296,7 +296,7 @@ let private = response.private; // hinted as a boolean
 
 #### Look up a public collection
 
-Returns details of, and items contained within, a public collection.
+Returns details of, and items contained within, a public collection. Returns `undefined` if the collection is not found.
 
 ```js
 let response = await client.catalog.getCollection(25043);
@@ -307,7 +307,7 @@ let items = response.items;
 
 #### Look up a single item
 
-Returns all details of a particular item on Envato Market.
+Returns all details of a particular item on Envato Market. Returns `undefined` if the item is not found.
 
 ```js
 let item = await client.catalog.getItem(123456);
@@ -319,7 +319,7 @@ let itemAuthor = item.author_username;
 
 #### Look up a WordPress theme or plugin's version
 
-Returns the latest available version of a theme/plugin. This is the recommended endpoint for WordPress theme/plugin authors building an auto-upgrade system into their item that needs to check if a new version is available.
+Returns the latest available version of a theme/plugin. This is the recommended endpoint for WordPress theme/plugin authors building an auto-upgrade system into their item that needs to check if a new version is available. Returns `undefined` if the theme or plugin is not found.
 
 ```js
 let version = await client.catalog.getItemVersion(123456);
@@ -390,7 +390,7 @@ for (let category of categories) {
 
 #### Get prices for an item
 
-Return available licenses and prices for the given item ID.
+Return available licenses and prices for the given item ID. Throws an error if the item is not found.
 
 ```js
 let prices = await client.catalog.getItemPrices(123456);
@@ -457,7 +457,8 @@ for (let collection of collections) {
 
 #### Look up a user's private collection
 
-Returns details and items for public or the user's private collections.
+Returns details and items for public or the user's private collections. Returns `undefined` if the collection is not
+found.
 
 ```js
 let { collection, items } = await client.user.getPrivateCollection(123456);
@@ -534,6 +535,7 @@ for (let sale of sales) {
 #### Look up a sale by code
 
 Returns the details of an author's sale identified by the purchase code. Author sales data ("Amount") is reported before subtraction of any income taxes (eg US Royalty Withholding Tax).
+Returns `undefined` if the sale is not found.
 
 ```js
 let sale = await client.private.getSale('purchase-code');
@@ -564,7 +566,8 @@ for (let purchase of purchases) {
 
 #### Look up a purchase by code
 
-Returns the details of a user's purchase identified by the purchase code.
+Returns the details of a user's purchase identified by the purchase code. Returns `undefined` if the purchase is not
+found.
 
 ```js
 let purchase = await client.private.getPurchase('purchase-code');
@@ -666,12 +669,12 @@ catch (error) {
 }
 ```
 
-As shown in the code above, requests can throw two different categories of errors. The first is an instance of `Envato.HttpError`, which will contain a message such as "Unauthorized" or "Not Found". It will also provide a `response` object which will look something like this:
+As shown in the code above, requests can throw two different categories of errors. The first is an instance of `Envato.HttpError`, which will contain a message such as "Unauthorized" or "Bad Request". It will also usually provide a `response` object which will look something like below, though under rare circumstances this object may be `undefined`:
 
 ```json
 {
-  "error": 404,
-  "description": "No sale belonging to the current user found with that code"
+  "error": 400,
+  "description": "An optional description of the error here"
 }
 ```
 
@@ -690,7 +693,11 @@ The second type of error is a generic `Error` instance which is most likely to o
 
 ### Not found errors
 
-The `Envato.NotFoundError` is a special case, because it represents a missing resource rather than a failed request. For instance, if you are looking up a sale by purchase code and the code is invalid, it will throw this error.
+For built-in endpoints that request a specific resource, this library will catch 404 errors and instead return `undefined` if the resource is not found.
+However, when sending requests manually, you will need to catch and handle any `Envato.NotFoundError` errors yourself.
+
+- For instance, looking up a purchase code or an item will return `undefined` if the resource is not found.
+- On the other hand, attempting to download an item or retrieve an item's prices will throw a `NotFoundError` if the item doesn't exist.
 
 ## Events
 

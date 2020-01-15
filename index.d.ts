@@ -253,7 +253,8 @@ declare namespace envato {
         constructor(client: Client);
 
         /**
-         * Returns details of, and items contained within, a public collection.
+         * Returns details of, and items contained within, a public collection. Returns `undefined` if the specified
+         * collection is not found.
          *
          * @param id The numeric ID of the collection to return.
          * @param page Page number.
@@ -261,7 +262,8 @@ declare namespace envato {
         getCollection(id: number, page?: number): Promise<GetCollectionResponse>;
 
         /**
-         * Returns all details of a particular item on Envato Market.
+         * Returns all details of a particular item on Envato Market. Returns `undefined` if the specified item is not
+         * found.
          *
          * @param id The numeric ID of the item to return.
          */
@@ -270,7 +272,7 @@ declare namespace envato {
         /**
          * Returns the latest available version of a theme/plugin. This is the recommended endpoint for Wordpress
          * theme/plugin authors building an auto-upgrade system into their item that needs to check if a new version is
-         * available.
+         * available. Returns `undefined` if the specified item is not found.
          *
          * @param id The numeric ID of the item to return.
          */
@@ -439,7 +441,8 @@ declare namespace envato {
 
         /**
          * Returns the details of an author's sale identified by the purchase code. Author sales data ("Amount") is reported
-         * before subtraction of any income taxes (eg US Royalty Withholding Tax).
+         * before subtraction of any income taxes (eg US Royalty Withholding Tax). Returns `undefined` if no matching sale
+         * is found.
          *
          * @param code The unique code of the sale to return.
          */
@@ -461,7 +464,8 @@ declare namespace envato {
         getPurchasesFromAppCreator(page?: number): Promise<GetPurchasesFromAppCreatorResponse>;
 
         /**
-         * Returns the details of a user's purchase identified by the purchase code.
+         * Returns the details of a user's purchase identified by the purchase code. Returns `undefined` if no matching
+         * purchase is found.
          *
          * @param code The unique code of the purchase to return.
          * @deprecated The `purchase:history` permission is deprecated, please use `purchase:verify` instead.
@@ -649,7 +653,8 @@ declare namespace envato {
         getCollections(): Promise<GetCollectionsResponse>;
 
         /**
-         * Returns details and items for public or the user's private collections.
+         * Returns details and items for public or the user's private collections. Returns `undefined` if the specified
+         * collection is not found.
          *
          * @param id The numeric ID of the collection to return.
          */
@@ -1184,6 +1189,41 @@ declare namespace envato {
         purchase_code?: string;
         shorten_url?: boolean | 'true' | 'false';
     };
+
+    abstract class HttpError extends Error {
+        public readonly code: number;
+        public readonly response ?: ErrorResponse;
+    }
+
+    class UnauthorizedError extends HttpError {
+        public constructor(response ?: ErrorResponse);
+    }
+
+    class BadRequestError extends HttpError {
+        public constructor(response ?: ErrorResponse);
+    }
+
+    class AccessDeniedError extends HttpError {
+        public constructor(response ?: ErrorResponse);
+    }
+
+    class NotFoundError extends HttpError {
+        public constructor(response ?: ErrorResponse);
+    }
+
+    class TooManyRequestsError extends HttpError {
+        public constructor(response ?: ErrorResponse);
+    }
+
+    class ServerError extends HttpError {
+        public constructor(response ?: ErrorResponse);
+    }
+
+    interface ErrorResponse {
+        error: string | number;
+        description ?: string;
+        code ?: string;
+    }
 
 }
 

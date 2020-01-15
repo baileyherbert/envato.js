@@ -35,4 +35,4 @@ export function prepare(host: string, ...values: (string | number | boolean)[]) 
     return format.apply(this, values);
 }
 
-export type Params = { [name: string] : string | number | boolean };
+export type Params = { [name: string] : string | number | boolean | undefined };

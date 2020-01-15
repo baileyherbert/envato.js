@@ -4,45 +4,48 @@ import { MarketName } from '../types/market';
 
 import * as url from '../util/url';
 import * as mutate from '../util/mutate';
+import * as errors from '../util/errors';
 
 export class CatalogClientGroup {
 
     public constructor(private client: Client) {}
 
     /**
-     * Returns details of, and items contained within, a public collection.
+     * Returns details of, and items contained within, a public collection. Returns `undefined` if the specified
+     * collection is not found.
      *
      * @param id The numeric ID of the collection to return.
      * @param page Page number.
      */
     public getCollection(id: number, page?: number) {
-        return this.client.get<GetCollectionResponse>(url.build('/v3/market/catalog/collection', {
+        return errors.find(this.client.get<GetCollectionResponse>(url.build('/v3/market/catalog/collection', {
             id, page
-        }));
+        })));
     }
 
     /**
-     * Returns all details of a particular item on Envato Market.
+     * Returns all details of a particular item on Envato Market. Returns `undefined` if the specified item is not
+     * found.
      *
      * @param id The numeric ID of the item to return.
      */
     public getItem(id: number) {
-        return this.client.get<GetItemResponse>(url.build('/v3/market/catalog/item', {
+        return errors.find(this.client.get<GetItemResponse>(url.build('/v3/market/catalog/item', {
             id
-        }));
+        })));
     }
 
     /**
      * Returns the latest available version of a theme/plugin. This is the recommended endpoint for Wordpress
      * theme/plugin authors building an auto-upgrade system into their item that needs to check if a new version is
-     * available.
+     * available. Returns `undefined` if the specified item is not found.
      *
      * @param id The numeric ID of the item to return.
      */
     public getItemVersion(id: number) {
-        return this.client.get<GetItemVersionResponse>(url.build('/v3/market/catalog/item-version', {
+        return errors.find(this.client.get<GetItemVersionResponse>(url.build('/v3/market/catalog/item-version', {
             id
-        }));
+        })));
     }
 
     /**

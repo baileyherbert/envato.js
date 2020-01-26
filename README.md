@@ -18,14 +18,12 @@ This is a library for working with the new Envato API.
 
 - Methods available for all endpoints at [build.envato.com](https://build.envato.com/).
 - Supports both OAuth and personal tokens.
-- Automatic renewal of OAuth access tokens.
-- Simple error handling.
-- Full type hinting and autocompletion.
-- Works in modern browsers.
+- Simplified error handling.
+- Full type hinting and autocompletion in modern editors.
+- Runs in modern web browsers.
 
-The return types in this library don't perfectly match the responses sent by the API. Instead, Envato.js extracts the
-relevant information from the responses and returns them without any extra bloat. It also converts data where possible,
-such as converting timestamps into `Date` objects.
+Envato.js extracts the relevant data from responses and returns them without any extra bloat. It also converts data
+where possible, such as converting timestamps into `Date` objects.
 
 ---
 
@@ -95,7 +93,7 @@ npm install envato
 ```js
 const Envato = require('envato');
 
-(async function() {
+async function start() {
     let client = new Envato.Client({
         token: 'personal token here'
     });
@@ -105,7 +103,9 @@ const Envato = require('envato');
     let email = await client.private.getEmail();
 
     console.log('Logged in:', userId, username, email);
-})();
+}
+
+start().catch(console.error);
 ```
 
 ## Creating a client
@@ -114,7 +114,7 @@ Before you can send requests, you must create a client instance with your person
 
 ### Personal token
 
-You can create a client from a personal token by passing the `token` parameter into the client options.
+You can create a client from a personal token by passing the `token` parameter into the client options. You can generate a new token at https://build.envato.com/create-token.
 
 ```js
 const client = new Envato.Client('your personal token');
@@ -122,7 +122,7 @@ const client = new Envato.Client('your personal token');
 
 ### OAuth
 
-The first step to working with OAuth is creating the OAuth helper instance. Supply the client ID, client secret, and redirect URI exactly as they were configured via [build.envato.com](https://build.envato.com):
+The first step to working with OAuth is creating the OAuth helper instance. Supply the client ID, client secret, and redirect URI exactly as they were configured via [build.envato.com](https://build.envato.com/register):
 
 ```js
 const oauth = new Envato.OAuth({
@@ -141,10 +141,12 @@ res.redirect(oauth.getRedirectUrl());
 Once the user returns from a successful authentication, the current URL should contain a `code` query parameter with an authentication code. Pass this code to `getClient` to finish the authentication process.
 
 ```js
+// This is an example express route to handle the request
 app.get('/authenticate', async function(req, res) {
     let code = req.query.code;
 
     try {
+        // Authenticate the user via the API
     	let client = await oauth.getClient(code);
         let username = await client.private.getUsername();
 
@@ -152,7 +154,7 @@ app.get('/authenticate', async function(req, res) {
     }
     catch (error) {
         console.error('Authentication failed:', error);
-        res.status(500).send('Something broke!');
+        res.status(500).send('Something broke! Try again.');
     }
 });
 ```
@@ -169,11 +171,19 @@ console.log('It expires at %d', expiration);
 In the future, if you need to reconstruct a client instance from these parameters, you must pass all three (as well as the OAuth helper instance) to enable automatic renewal of the access token.
 
 ```js
+// For automatic renewal of access tokens, you'll need an OAuth instance
+// It must have the same credentials as the instance that originally authenticated the user
+const oauth = new Envato.OAuth(...);
+
+// To construct a client without automatic renewal, simply pass the token
+let client = new Envato.Client(database.load('token'));
+
+// To construct a client with automatic renewal, pass all properties and an OAuth instance
 let client = new Envato.Client({
     token: database.load('token'),
     refreshToken: database.load('refreshToken'),
     expiration: database.load('expiration'),
-    oauth: new Envato.OAuth() // oauth instance must have the client_id and client_secret set
+    oauth
 });
 ```
 
@@ -181,8 +191,8 @@ Additionally, you will likely want to keep track of the new access token and exp
 
 ```js
 client.on('renew', renewal => {
-   	console.log('Got a new access token:', renewal.access_token);
-   	console.log('The new token expires at:', renewal.expiration);
+    console.log('Got a new access token:', renewal.access_token);
+    console.log('The new token expires at:', renewal.expiration);
 });
 ```
 
@@ -203,7 +213,7 @@ new Envato.Client({
 
 #### Request options
 
-This library uses `request` under the hood for its HTTP requests. If you need to specify HTTP options, you can use the `request` option in the client. Check out the [request docs](https://www.npmjs.com/package/request#requestoptions-callback) for a list of available options.
+This library uses [`request`](https://www.npmjs.com/package/request) under the hood for its HTTP requests. If you need to specify HTTP options, you can use the `request` option in the client. Check out the [request docs](https://www.npmjs.com/package/request#requestoptions-callback) for a list of available options.
 
 ```js
 new Envato.Client({
@@ -225,16 +235,16 @@ There are four endpoint helpers for sending requests. Each is a class accessible
 - Private user – `client.private`
 - Statistics – `client.stats`
 
-When sending a request, you will receive a `Promise` instance in return. I recommend using the `await` syntax, but you can also do it the old fashioned way as shown below.
+When sending a request, you will receive a `Promise` instance in return. I recommend using the `await` syntax, but you can also do it the old fashioned way as shown in the section below.
 
 Note that the return values from this wrapper won't always perfectly match the responses from the API. This wrapper tries to provide consistent types, so check the code samples below or refer to your editor's type hinting to determine return types.
 
 ### Using promises
 
-The code samples in this documentation use the `await` operator for simplicity and convenience. However, you can still use promises the old-fashioned way if you'd like:
+The code samples in this documentation use the `await` operator for simplicity and convenience. However, you can still use promises the old-fashioned way if you'd like. The code snippet below shows both methods.
 
 ```js
-// With await operator
+// With await operator (recommended)
 try {
     let username = await client.private.getUsername();
     console.log(`Hello, ${username}!`);
@@ -286,15 +296,15 @@ let response = await client.post('/v3/path/to/endpoint', params);
 For TypeScript users, it is possible to use generics to specify the format of the return value:
 
 ```ts
-type Response = {
+interface Response {
     id: number;
     name: string;
     private: boolean;
 };
 
 let response = await client.get<Response>('/v3/endpoint');
-let id = response.id; // hinted as a number
-let private = response.private; // hinted as a boolean
+let id = response.id; // Hinted as a number
+let private = response.private; // Hinted as a boolean
 ```
 
 ### Catalog
@@ -678,8 +688,8 @@ As shown in the code above, requests can throw two different categories of error
 
 ```json
 {
-  "error": 400,
-  "description": "An optional description of the error here"
+    "error": 400,
+    "description": "An optional description of the error here"
 }
 ```
 
@@ -725,6 +735,6 @@ This event is triggered once for each request, and is sent the raw arguments fro
 
 ```js
 client.on('debug', function(err, response, body) {
-   	console.log('Debug:', err, response, body);
+    console.log('Debug:', err, response, body);
 });
 ```

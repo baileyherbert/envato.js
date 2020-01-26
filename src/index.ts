@@ -1,3 +1,18 @@
+import { Client } from './client';
+import { OAuth } from './oauth';
+import {
+    HttpError,
+    UnauthorizedError,
+    BadRequestError,
+    AccessDeniedError,
+    NotFoundError,
+    ServerError,
+    TooManyRequestsError
+} from './errors/http';
+
+/*
+    Named exports
+*/
 
 export * from './client';
 export * from './oauth';
@@ -50,3 +65,19 @@ export * from './types/market';
 export * from './types/private';
 
 export * from './errors/http';
+
+/*
+    Default export
+*/
+
+export default {
+    Client,
+    OAuth,
+    HttpError,
+    UnauthorizedError,
+    BadRequestError,
+    AccessDeniedError,
+    NotFoundError,
+    TooManyRequestsError,
+    ServerError
+};

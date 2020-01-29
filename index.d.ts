@@ -5,13 +5,35 @@ import events = require('events');
 
 declare namespace envato {
     class Client {
-        constructor(token: string);
-        constructor(options: ClientOptions);
+        /**
+         * A collection of endpoints for browsing the Envato Market catalog.
+         */
+        public readonly catalog: CatalogClientGroup;
+
+        /**
+         * A collection of endpoints for accessing private details about the current user.
+         */
+        public readonly private: PrivateClientGroup;
+
+        /**
+         * A collection of endpoints for accessing public details about users.
+         */
+        public readonly user: UserClientGroup;
+
+        /**
+         * A collection of endpoints for retrieving general statistics about the marketplaces.
+         */
+        public readonly stats: StatsClientGroup;
+
+        /**
+         * The client options.
+         */
+        public options: ClientOptions;
 
         /**
          * The current access token for the client, which may either be an OAuth access token or a personal token.
          */
-        get token(): string;
+        public token(): string;
 
         /**
          * The refresh token if one was provided when the client was instantiated. The refresh token is only applicable to
@@ -19,13 +41,19 @@ declare namespace envato {
          *
          * If a refresh token is not known or available, this will be `undefined`.
          */
-        get refreshToken(): string;
+        public refreshToken: string | undefined;
 
         /**
          * The timestamp (in milliseconds) when the current token expires. This will be `undefined` if the client was not
          * instantiated with an expiration time.
          */
-        get expiration(): number | Date;
+        public expiration: number | Date | undefined;
+
+        /**
+         * Constructs a new `Client` instance.
+         */
+        constructor(token: string);
+        constructor(options: ClientOptions);
 
         /**
          * This will be  `true` if this token has expired. This will always return `false` if the client was not
@@ -44,26 +72,6 @@ declare namespace envato {
          * the number of seconds until the token expires.
          */
         getIdentity(): Promise<IdentityResponse>;
-
-        /**
-         * A collection of endpoints for browsing the Envato Market catalog.
-         */
-        get catalog(): CatalogClientGroup;
-
-        /**
-         * A collection of endpoints for accessing private details about the current user.
-         */
-        get private(): PrivateClientGroup;
-
-        /**
-         * A collection of endpoints for accessing public details about users.
-         */
-        get user(): UserClientGroup;
-
-        /**
-         * A collection of endpoints for retrieving general statistics about the marketplaces.
-         */
-        get stats(): StatsClientGroup;
 
         /**
          * Sends a `GET` request to the given path on the API and returns the parsed response.
@@ -113,9 +121,11 @@ declare namespace envato {
         }): Promise<T>;
 
         on(event: 'debug', listener: (err: Error | undefined, response: request.Response, body: string) => void): this;
+        on(event: 'throttle', listener: (err: Error | undefined, response: request.Response, body: string) => void): this;
         on(event: 'renew', listener: (data: RefreshedToken) => void): this;
 
         once(event: 'debug', listener: (err: Error | undefined, response: request.Response, body: string) => void): this;
+        once(event: 'throttle', listener: (err: Error | undefined, response: request.Response, body: string) => void): this;
         once(event: 'renew', listener: (data: RefreshedToken) => void): this;
     }
 
@@ -164,6 +174,15 @@ declare namespace envato {
          * Optional configuration for the underlying `request` library.
          */
         request?: request.CoreOptions;
+
+        /**
+         * If set to `true`, the client will automatically handle rate limits. Any blocked requests will be retried when
+         * the rate limit ends. Any additional requests sent during a rate limit event will be deferred. Rate limit events
+         * will trigger a `throttle` event on the client when this feature is enabled.
+         *
+         * Defaults to `true`.
+         */
+        handleRateLimits ?: boolean;
     }
 
     interface IdentityResponse {

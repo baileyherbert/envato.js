@@ -11,52 +11,56 @@ import * as Errors from './errors/http';
 export class Client extends EventEmitter {
 
     /**
-     * @internal
+     * A collection of endpoints for browsing the Envato Market catalog.
      */
-    private _catalog : CatalogClientGroup;
+    public readonly catalog : CatalogClientGroup;
 
     /**
-     * @internal
+     * A collection of endpoints for accessing private details about the current user.
      */
-    private _private: PrivateClientGroup;
+    public readonly private: PrivateClientGroup;
 
     /**
-     * @internal
+     * A collection of endpoints for accessing public details about users.
      */
-    private _stats: StatsClientGroup;
+    public readonly user: UserClientGroup;
 
     /**
-     * @internal
+     * A collection of endpoints for retrieving general statistics about the marketplaces.
      */
-    private _user: UserClientGroup;
+    public readonly stats: StatsClientGroup;
 
     /**
-     * @internal
+     * The client options.
      */
-    private options : ClientOptions;
+    public options : ClientOptions;
 
     public constructor(token: string);
     public constructor(options: ClientOptions);
     public constructor(tokenOrOptions: ClientOptions | string) {
         super();
 
+        // Convert the options to an object
         if (typeof tokenOrOptions === 'string') {
             tokenOrOptions = { token: tokenOrOptions };
         }
 
+        // Set defaults
+        if (typeof tokenOrOptions.handleRateLimits === 'undefined') tokenOrOptions.handleRateLimits = true;
+
+        // Set properties
         this.options = tokenOrOptions;
-        this._catalog = new CatalogClientGroup(this);
-        this._private = new PrivateClientGroup(this);
-        this._stats = new StatsClientGroup(this);
-        this._user = new UserClientGroup(this);
+        this.catalog = new CatalogClientGroup(this);
+        this.private = new PrivateClientGroup(this);
+        this.stats = new StatsClientGroup(this);
+        this.user = new UserClientGroup(this);
     }
 
     /**
      * The current access token for the client, which may either be an OAuth access token or a personal token.
      */
-    public get token() {
-        return this.options.token;
-    }
+    public get token() { return this.options.token; }
+    public set token(token: string) { this.options.token = token; }
 
     /**
      * The refresh token if one was provided when the client was instantiated. The refresh token is only applicable to
@@ -64,17 +68,15 @@ export class Client extends EventEmitter {
      *
      * If a refresh token is not known or available, this will be `undefined`.
      */
-    public get refreshToken() {
-        return this.options.refreshToken;
-    }
+    public get refreshToken() { return this.options.refreshToken; }
+    public set refreshToken(token : string | undefined) { this.options.refreshToken = token; }
 
     /**
      * The timestamp (in milliseconds) when the current token expires. This will be `undefined` if the client was not
      * instantiated with an expiration time.
      */
-    public get expiration() {
-        return this.options.expiration;
-    }
+    public get expiration() { return this.options.expiration; }
+    public set expiration(expiration: number | Date | undefined) { this.options.expiration = expiration; }
 
     /**
      * This will be  `true` if this token has expired. This will always return `false` if the client was not
@@ -109,34 +111,6 @@ export class Client extends EventEmitter {
      */
     public getIdentity() {
         return this.get<IdentityResponse>('/whoami');
-    }
-
-    /**
-     * A collection of endpoints for browsing the Envato Market catalog.
-     */
-    public get catalog() {
-        return this._catalog;
-    }
-
-    /**
-     * A collection of endpoints for accessing private details about the current user.
-     */
-    public get private() {
-        return this._private;
-    }
-
-    /**
-     * A collection of endpoints for accessing public details about users.
-     */
-    public get user() {
-        return this._user;
-    }
-
-    /**
-     * A collection of endpoints for retrieving general statistics about the marketplaces.
-     */
-    public get stats() {
-        return this._stats;
     }
 
     /**
@@ -279,13 +253,14 @@ export class Client extends EventEmitter {
     }
 
     public on(event: 'debug', listener: (err: Error | undefined, response: request.Response, body: string) => void): this;
+    public on(event: 'throttle', listener: (err: Error | undefined, response: request.Response, body: string) => void): this;
     public on(event: 'renew', listener: (data: RefreshedToken) => void): this;
     public on(event: string, listener: (...args: any[]) => void) {
         return super.on(event, listener);
     }
 }
 
-export type ClientOptions = {
+export interface ClientOptions {
 
     /**
      * The token to use for authorization. Acceptable values include:
@@ -323,7 +298,8 @@ export type ClientOptions = {
     expiration ?: Date | number;
 
     /**
-     * The OAuth helper instance to use for automatically refreshing access tokens.
+     * The OAuth helper instance to use for automatically refreshing access tokens. This instance must have the same
+     * credentials as the instance that was used to authenticate the OAuth session.
      */
     oauth ?: OAuth;
 
@@ -332,9 +308,18 @@ export type ClientOptions = {
      */
     request ?: request.CoreOptions;
 
+    /**
+     * If set to `true`, the client will automatically handle rate limits. Any blocked requests will be retried when
+     * the rate limit ends. Any additional requests sent during a rate limit event will be deferred. Rate limit events
+     * will trigger a `throttle` event on the client when this feature is enabled.
+     *
+     * Defaults to `true`.
+     */
+    handleRateLimits ?: boolean;
+
 };
 
-export type IdentityResponse = {
+export interface IdentityResponse {
     /**
      * The client ID of the application, if this is an OAuth session. Otherwise, this is `null`.
      */

@@ -67,17 +67,7 @@ export * from './types/private';
 export * from './errors/http';
 
 /*
-    Default export
+    Default export for easier importing in TypeScript projects
 */
 
-export default {
-    Client,
-    OAuth,
-    HttpError,
-    UnauthorizedError,
-    BadRequestError,
-    AccessDeniedError,
-    NotFoundError,
-    TooManyRequestsError,
-    ServerError
-};
+module.exports.default = module.exports;

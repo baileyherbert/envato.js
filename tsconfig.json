@@ -5,7 +5,6 @@
         "moduleResolution": "node",
         "newLine": "lf",
         "noEmitOnError": true,
-        "declaration": false,
         "stripInternal": true,
         "strictNullChecks": true,
         "pretty": true,

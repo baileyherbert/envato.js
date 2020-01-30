@@ -19,6 +19,7 @@ This is a library for working with the new Envato API.
 - Methods available for all endpoints at [build.envato.com](https://build.envato.com/).
 - Supports both OAuth and personal tokens.
 - Simplified error handling.
+- Handles rate limits and concurrency for you.
 - Full type hinting and autocompletion in modern editors.
 - Runs in modern web browsers.
 
@@ -34,6 +35,8 @@ where possible, such as converting timestamps into `Date` objects.
   - [Client options](#client-options)
     - [User agent](#user-agent)
     - [Request options](#request-options)
+    - [Rate limiting](#rate-limiting)
+    - [Concurrency](#concurrency)
 - [Sending requests](#sending-requests)
   - [Using promises](#using-promises)
   - [Getting a user's identity](#getting-a-users-identity)
@@ -79,12 +82,14 @@ where possible, such as converting timestamps into `Date` objects.
 - [Events](#events)
   - [Renew](#renew)
   - [Debug](#debug)
+  - [Ratelimit](#ratelimit)
+  - [Resume](#resume)
 
 ---
 
 ## Basic usage
 
-To get started, install [the package](https://npmjs.com/package/envato) into your project and require it like normal. Then you can begin using the exported `Client` and `OAuth` classes immediately.
+To get started, install [the package](https://npmjs.com/package/envato) into your project and require it. Then you can begin using the exported `Client` and `OAuth` classes.
 
 ```
 npm install envato
@@ -94,9 +99,7 @@ npm install envato
 const Envato = require('envato');
 
 async function start() {
-    let client = new Envato.Client({
-        token: 'personal token here'
-    });
+    let client = new Envato.Client('personal token here');
 
     let { userId } = await client.getIdentity();
     let username = await client.private.getUsername();
@@ -118,6 +121,9 @@ You can create a client from a personal token by passing the `token` parameter i
 
 ```js
 const client = new Envato.Client('your personal token');
+const client = new Envato.Client({
+    token: 'your personal token'
+});
 ```
 
 ### OAuth
@@ -225,6 +231,18 @@ new Envato.Client({
     }
 })
 ```
+
+#### Rate limiting
+
+The `handleRateLimits` option controls how the client responds to rate limiting. If set to `true` (default), the client will silently handle rate limit errors by pausing subsequent requests until the rate limit expires, as well as retrying the failed request automatically. This process is entirely behind-the-scenes and requires no extra implementation from you.
+
+Setting this option to `false` will disable silent rate limit handling, and instead will throw `Envato.TooManyRequests` errors when rate limits are encountered. You will need to manually throttle your requests.
+
+#### Concurrency
+
+The `concurrency` option controls how many active requests the client can have at a single time. The default value is `3`, which means if you send four requests at the same time, only the first three will execute initially, and the fourth will be deferred until one of the first three completes.
+
+Setting this option to `0` will disable throttling, meaning requests will always be executed immediately, and `handleRateLimits` will be forcefully disabled for safety reasons.
 
 ## Sending requests
 
@@ -693,7 +711,7 @@ As shown in the code above, requests can throw two different categories of error
 }
 ```
 
-The second type of error is a generic `Error` instance which is most likely to originate from the underlying `request` library and will ultimately be caused by a connection error, parsing error, or timeout.
+The second type of error is a generic `Error` instance which is most likely to originate from the underlying `request` library and will ultimately be caused by a connection error, parsing error, or timeout. You will also receive a generic `Error` instance if you send a request through an expired OAuth token and it fails to automatically renew the token.
 
 ### Error codes
 
@@ -712,11 +730,11 @@ For built-in endpoints that request a specific resource, this library will catch
 However, when sending requests manually, you will need to catch and handle any `Envato.NotFoundError` errors yourself.
 
 - For instance, looking up a purchase code or an item will return `undefined` if the resource is not found.
-- On the other hand, attempting to download an item or retrieve an item's prices will throw a `NotFoundError` if the item doesn't exist.
+- On the other hand, attempting to download an item or retrieve an item's prices will reject with a `NotFoundError` if the item doesn't exist.
 
 ## Events
 
-The client exposes two events that you can listen to using the `on()` method.
+The client exposes events that you can listen to using the `on()` and `once()` methods.
 
 ### Renew
 
@@ -736,5 +754,25 @@ This event is triggered once for each request, and is sent the raw arguments fro
 ```js
 client.on('debug', function(err, response, body) {
     console.log('Debug:', err, response, body);
+});
+```
+
+### Ratelimit
+
+This event is triggered when the client receives a rate limit error from the API and starts pausing requests until the rate limit expires. It passes a single argument, the duration of the rate limit in milliseconds. During this time, any requests you try to send with the client will be held until the duration expires. This event is only triggered if [`handleRateLimits`](#rate-limiting) is set to `true` (the default).
+
+```js
+client.on('ratelimit', function(duration) {
+    console.log('Rate limited for %d milliseconds.', duration);
+});
+```
+
+### Resume
+
+This event is triggered after a rate limit expires and the client begins sending requests again. This event is only triggered if [`handleRateLimits`](#rate-limiting) is set to `true` (the default).
+
+```js
+client.on('resume', function() {
+    console.log('Rate limit has ended.');
 });
 ```

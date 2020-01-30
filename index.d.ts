@@ -33,7 +33,7 @@ declare namespace envato {
         /**
          * The current access token for the client, which may either be an OAuth access token or a personal token.
          */
-        public token(): string;
+        public token: string;
 
         /**
          * The refresh token if one was provided when the client was instantiated. The refresh token is only applicable to
@@ -120,13 +120,55 @@ declare namespace envato {
             [name: string]: any;
         }): Promise<T>;
 
+        /**
+         * The `debug` event is triggered for each request the client makes, with the `err`, `response`, and `body`
+         * parameters sent back from Request. This makes it a great event for debugging and logging.
+         */
         on(event: 'debug', listener: (err: Error | undefined, response: request.Response, body: string) => void): this;
-        on(event: 'throttle', listener: (err: Error | undefined, response: request.Response, body: string) => void): this;
+
+        /**
+         * The `renew` event is triggered each time the client automatically renews an access token. This only applies
+         * to tokens generated through OAuth.
+         */
         on(event: 'renew', listener: (data: RefreshedToken) => void): this;
 
+        /**
+         * The `ratelimit` event is triggered when the client is rate limited by Envato. The `duration` parameter
+         * will contain the duration of the rate limit in milliseconds. This does not trigger if
+         * `handleRateLimits` is set to `false` in the client options.
+         */
+        on(event: 'ratelimit', listener: (duration: number) => void): this;
+
+        /**
+         * The `resume` event is triggered when throttling ends after a rate limit. This does not trigger if
+         * `handleRateLimits` is set to `false` in the client options.
+         */
+        on(event: 'resume', listener: () => void): this;
+
+        /**
+         * The `debug` event is triggered for each request the client makes, with the `err`, `response`, and `body`
+         * parameters sent back from Request. This makes it a great event for debugging and logging.
+         */
         once(event: 'debug', listener: (err: Error | undefined, response: request.Response, body: string) => void): this;
-        once(event: 'throttle', listener: (err: Error | undefined, response: request.Response, body: string) => void): this;
+
+        /**
+         * The `renew` event is triggered each time the client automatically renews an access token. This only applies
+         * to tokens generated through OAuth.
+         */
         once(event: 'renew', listener: (data: RefreshedToken) => void): this;
+
+        /**
+         * The `ratelimit` event is triggered when the client is rate limited by Envato. The `duration` parameter
+         * will contain the duration of the rate limit in milliseconds. This does not trigger if
+         * `handleRateLimits` is set to `false` in the client options.
+         */
+        once(event: 'ratelimit', listener: (duration: number) => void): this;
+
+        /**
+         * The `resume` event is triggered when throttling ends after a rate limit. This does not trigger if
+         * `handleRateLimits` is set to `false` in the client options.
+         */
+        once(event: 'resume', listener: () => void): this;
     }
 
     interface ClientOptions {
@@ -183,6 +225,16 @@ declare namespace envato {
          * Defaults to `true`.
          */
         handleRateLimits ?: boolean;
+
+        /**
+         * The maximum number of simultaneous requests this client can send to Envato. It is highly recommended to set a
+         * fairly low limit to avoid getting rate limited.
+         *
+         * If set to `0`, requests will not be throttled and will always be executed immediately.
+         *
+         * Defaults to `3`.
+         */
+        concurrency ?: number;
     }
 
     interface IdentityResponse {

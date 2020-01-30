@@ -6,6 +6,7 @@ import { StatsClientGroup } from './client/stats';
 import { UserClientGroup } from './client/user';
 import { OAuth, RefreshedToken } from './oauth';
 import { EventEmitter } from 'events';
+import { Queue } from './util/queue';
 import * as Errors from './errors/http';
 
 export class Client extends EventEmitter {
@@ -35,6 +36,14 @@ export class Client extends EventEmitter {
      */
     public options : ClientOptions;
 
+    /**
+     * The queue for executing requests.
+     */
+    private queue : Queue;
+
+    /**
+     * Constructs a new `Client` instance.
+     */
     public constructor(token: string);
     public constructor(options: ClientOptions);
     public constructor(tokenOrOptions: ClientOptions | string) {
@@ -54,6 +63,11 @@ export class Client extends EventEmitter {
         this.private = new PrivateClientGroup(this);
         this.stats = new StatsClientGroup(this);
         this.user = new UserClientGroup(this);
+        this.queue = new Queue(this);
+
+        // Forward queue events
+        this.queue.on('ratelimit', duration => this.emit('ratelimit', duration));
+        this.queue.on('resume', () => this.emit('resume'));
     }
 
     /**
@@ -167,7 +181,7 @@ export class Client extends EventEmitter {
      * @internal
      */
     protected fetch<T>(method: string, path: string, form ?: { [name: string]: any }) : Promise<T> {
-        return new Promise(async (resolve, reject) => {
+        return this.queue.push<T>(async (resolve, reject, retry) => {
             if (this.expired && this.options.oauth && this.options.refreshToken) {
                 let refresh = await this.options.oauth.renew(this);
 
@@ -185,7 +199,19 @@ export class Client extends EventEmitter {
                 },
                 method,
                 form
-            }), (err, response, body) => this.handleResponse(err, response, body, resolve, reject));
+            }), (err, response, body) => {
+                this.emit('debug', err, response, body);
+
+                if ((this.options.concurrency || 1) > 0 && this.options.handleRateLimits && response.statusCode === 429) {
+                    let retryAfterString = response.headers['retry-after'] || '0';
+                    let retryAfter = parseInt(retryAfterString) || 0;
+
+                    // Reschedule the fetch in the queue
+                    return retry(retryAfter);
+                }
+
+                this.handleResponse(err, response, body, resolve, reject);
+            });
         });
     }
 
@@ -202,8 +228,6 @@ export class Client extends EventEmitter {
      * @internal
      */
     private handleResponse(err: any, response: request.Response, body: any, resolve: Function, reject: Function) {
-        this.emit('debug', err, response, body);
-
         if (err) return reject(err);
         if (response.statusCode !== 200) {
             switch (response.statusCode) {
@@ -253,8 +277,9 @@ export class Client extends EventEmitter {
     }
 
     public on(event: 'debug', listener: (err: Error | undefined, response: request.Response, body: string) => void): this;
-    public on(event: 'throttle', listener: (err: Error | undefined, response: request.Response, body: string) => void): this;
     public on(event: 'renew', listener: (data: RefreshedToken) => void): this;
+    public on(event: 'ratelimit', listener: (duration: number) => void): this;
+    public on(event: 'resume', listener: () => void): this;
     public on(event: string, listener: (...args: any[]) => void) {
         return super.on(event, listener);
     }
@@ -311,11 +336,24 @@ export interface ClientOptions {
     /**
      * If set to `true`, the client will automatically handle rate limits. Any blocked requests will be retried when
      * the rate limit ends. Any additional requests sent during a rate limit event will be deferred. Rate limit events
-     * will trigger a `throttle` event on the client when this feature is enabled.
+     * will trigger a `throttled` event on the client when this feature is enabled.
+     *
+     * If set to `false`, rate limited requests will throw an `Envato.TooManyRequests` error and subsequent requests
+     * will not be throttled.
      *
      * Defaults to `true`.
      */
     handleRateLimits ?: boolean;
+
+    /**
+     * The maximum number of simultaneous requests this client can send to Envato. It is highly recommended to set a
+     * fairly low limit to avoid getting rate limited.
+     *
+     * If set to `0`, requests will not be throttled and will always be executed immediately.
+     *
+     * Defaults to `3`.
+     */
+    concurrency ?: number;
 
 };
 

@@ -1,6 +1,6 @@
 {
     "name": "envato",
-    "version": "2.2.0",
+    "version": "2.3.0",
     "description": "Library for the Envato API, with support for both personal tokens and OAuth.",
     "main": "dist/index.js",
     "types": "index.d.ts",
@@ -30,12 +30,12 @@
         "envato api"
     ],
     "devDependencies": {
-        "@types/chai": "^4.2.4",
+        "@types/chai": "^4.2.8",
         "@types/mocha": "^5.2.7",
-        "@types/node": "^12.11.7",
-        "@types/request": "^2.48.3",
+        "@types/node": "^12.12.26",
+        "@types/request": "^2.48.4",
         "chai": "^4.2.0",
         "mocha": "^6.2.2",
-        "typescript": "^3.7.2"
+        "typescript": "^3.7.5"
     }
 }

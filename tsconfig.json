@@ -7,7 +7,6 @@
         "noEmitOnError": true,
         "stripInternal": true,
         "strictNullChecks": true,
-        "pretty": true,
         "rootDir": "src",
         "outDir": "dist",
         "types": ["node"]

@@ -95,7 +95,8 @@ describe('personal client', () => {
         it('can retrieve market categories', async () => {
             let response = await client.catalog.getCategories('themeforest');
 
-            expect(response).to.be.an('array').that.is.not.empty;
+            expect(response).to.be.an('array');
+            expect(response).to.have.length.above(0);
             expect(response[0].name).to.be.a('string');
         });
     });
@@ -111,7 +112,8 @@ describe('personal client', () => {
         it('can retrieve collections', async () => {
             let response = await client.user.getCollections();
 
-            expect(response).to.be.an('array').that.is.not.empty;
+            expect(response).to.be.an('array');
+            expect(response).to.have.length.above(0);
             expect(response[0]).to.have.property('name');
         });
     });
@@ -150,7 +152,8 @@ describe('personal client', () => {
 
         it('can retrieve monthly sales', async () => {
             let response = await client.private.getMonthlySales();
-            expect(response).to.be.an('array').that.is.not.empty;
+            expect(response).to.be.an('array');
+            expect(response).to.have.length.above(0);
         });
     });
 });

@@ -1,6 +1,7 @@
-import * as request from 'request';
 import * as url from './util/url';
 import { Client } from './client';
+import { AxiosRequestConfig } from 'axios';
+import { Http } from './helpers/http';
 
 export class OAuth {
 
@@ -23,39 +24,30 @@ export class OAuth {
      * @param code The single-use authentication code returned from the Envato authorization screen.
      */
     public getClient(code: string) : Promise<Client> {
-        return new Promise((resolve, reject) => {
-            request.post('https://api.envato.com/token', Object.assign({}, this.options.request || {}, {
-                form: {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let url = 'https://api.envato.com/token';
+                let headers = { 'User-Agent': this.options.userAgent };
+                let axios = this.options.axios;
+                let form = {
                     grant_type: 'authorization_code',
                     client_id: this.options.client_id,
                     client_secret: this.options.client_secret,
                     code
-                },
-                headers: {
-                    'User-Agent': 'Envato.js (https://github.com/baileyherbert/envato.js)'
-                }
-            }), (err, response, body: string) => {
-                if (err) return reject(err);
-                if (response.statusCode !== 200) {
-                    if (body.startsWith('{')) {
-                        let error = JSON.parse(body);
+                };
 
-                        if (error.error) {
-                            switch (error.error) {
-                                case 'invalid_grant': return reject(new Error('The given code was invalid or expired'));
-                            }
-                        }
+                let res = await Http.fetch<ResponseData>({ url, headers, form, axios });
+                let data = res.body;
 
-                        if (error.error_description) {
-                            return reject(new Error(error.error_description));
-                        }
-                    }
-
-                    return reject(new Error(`Got unexpected status code (${response.statusCode})`));
+                // If the status code isn't 200, then statusError will have an HttpError instance that we can throw
+                if (res.statusError) {
+                    return reject(res.statusError);
                 }
 
-                let data : ResponseData = JSON.parse(body);
-                if (!data.token_type) return reject(new Error('Unexpected response from API: \n' + body));
+                // Make sure the response includes a token
+                if (!data.token_type) {
+                    return reject(new Error('Unexpected response from API when renewing token: \n' + res.response.data));
+                }
 
                 resolve(new Client({
                     token: data.access_token,
@@ -64,7 +56,10 @@ export class OAuth {
                     expiration: (new Date()).getTime() + (data.expires_in * 1000) - 1000,
                     oauth: this
                 }));
-            });
+            }
+            catch (error) {
+                reject(error);
+            }
         });
     }
 
@@ -74,32 +69,40 @@ export class OAuth {
      * @param client The client whose access token needs to be renewed.
      */
     public renew(client: Client) : Promise<RefreshedToken> {
-        return new Promise((resolve, reject) => {
-            request.post('https://api.envato.com/token', Object.assign({}, this.options.request || {}, {
-                form: {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let url = 'https://api.envato.com/token';
+                let headers = { 'User-Agent': this.options.userAgent };
+                let axios = this.options.axios;
+                let form = {
                     grant_type: 'refresh_token',
                     client_id: this.options.client_id,
                     client_secret: this.options.client_secret,
                     refresh_token: client.refreshToken
-                },
-                headers: {
-                    'User-Agent': 'Envato.js (https://github.com/baileyherbert/envato.js)'
-                }
-            }), (err, response, body: string) => {
-                if (err) return reject(err);
-                if (response.statusCode !== 200) {
-                    return reject(new Error(`Got unexpected status code (${response.statusCode}) when renewing token`));
+                };
+
+                let res = await Http.fetch<RefreshResponseData>({ url, headers, form, axios });
+                let data = res.body;
+
+                // If the status code isn't 200, then statusError will have an HttpError instance that we can throw
+                if (res.statusError) {
+                    return reject(res.statusError);
                 }
 
-                let data : RefreshResponseData = JSON.parse(body);
-                if (!data.token_type) return reject(new Error('Unexpected response from API when renewing token: \n' + body));
+                // Make sure the response includes a token
+                if (!data.token_type) {
+                    return reject(new Error('Unexpected response from API when renewing token: \n' + res.response.data));
+                }
 
                 resolve({
                     token: data.access_token,
                     access_token: data.access_token,
                     expiration: (new Date()).getTime() + (data.expires_in * 1000) - 1000
                 });
-            });
+            }
+            catch (error) {
+                reject(error);
+            }
         });
     }
 
@@ -136,9 +139,9 @@ export type OAuthOptions = {
     userAgent ?: string;
 
     /**
-     * Optional configuration for the underlying `request` library.
+     * Optional configuration for the underlying `axios` library.
      */
-    request ?: request.CoreOptions;
+    axios ?: AxiosRequestConfig;
 
 };
 

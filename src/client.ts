@@ -1,4 +1,5 @@
-import * as request from 'request';
+import axios, { AxiosResponse, AxiosRequestConfig } from 'axios';
+import { stringify } from 'qs';
 
 import { CatalogClientGroup } from './client/catalog';
 import { PrivateClientGroup } from './client/private';
@@ -7,7 +8,8 @@ import { UserClientGroup } from './client/user';
 import { OAuth, RefreshedToken } from './oauth';
 import { EventEmitter } from 'events';
 import { Queue } from './util/queue';
-import * as Errors from './errors/http';
+import * as Errors from './helpers/errors';
+import { Http, RequestMethod, FetchResponse } from './helpers/http';
 
 export class Client extends EventEmitter {
 
@@ -180,7 +182,7 @@ export class Client extends EventEmitter {
      * Fetches the path via the given method.
      * @internal
      */
-    protected fetch<T>(method: string, path: string, form ?: { [name: string]: any }) : Promise<T> {
+    protected fetch<T>(method: RequestMethod, path: string, form ?: { [name: string]: any }) : Promise<T> {
         return this.queue.push<T>(async (resolve, reject, retry) => {
             if (this.expired && this.options.oauth && this.options.refreshToken) {
                 let refresh = await this.options.oauth.renew(this);
@@ -191,92 +193,52 @@ export class Client extends EventEmitter {
                 this.emit('renew', refresh);
             }
 
-            request(Object.assign({}, this.options.request || {}, {
-                url: this.uri(path),
-                headers: {
-                    'Authorization': 'Bearer ' + this.options.token,
-                    'User-Agent': this.options.userAgent || 'Envato.js (https://github.com/baileyherbert/envato.js)'
-                },
-                method,
-                form
-            }), (err, response, body) => {
-                this.emit('debug', err, response, body);
+            try {
+                let url = this._getRequestUrl(path);
+                let headers = this._getRequestHeaders();
+                let axios = this.options.axios;
+                let res = await Http.fetch<T>({ method, url, headers, form, axios });
 
-                if ((this.options.concurrency || 1) > 0 && this.options.handleRateLimits && response.statusCode === 429) {
-                    let retryAfterString = response.headers['retry-after'] || '0';
+                this.emit('debug', res.response);
+
+                if ((this.options.concurrency || 1) > 0 && this.options.handleRateLimits && res.status === 429) {
+                    let retryAfterString = res.headers['retry-after'] || '0';
                     let retryAfter = parseInt(retryAfterString) || 0;
 
                     // Reschedule the fetch in the queue
                     return retry(retryAfter);
                 }
 
-                this.handleResponse(err, response, body, resolve, reject);
-            });
+                // If the status code isn't 200, then statusError will have an HttpError instance that we can throw
+                if (res.statusError) {
+                    return reject(res.statusError);
+                }
+
+                // At this point, we should have everything squared away
+                resolve(res.body);
+            }
+            catch (error) {
+                reject(error);
+            }
         });
+    }
+
+    private _getRequestHeaders() {
+        return {
+            'Authorization': 'Bearer ' + this.options.token,
+            'User-Agent': this.options.userAgent
+        };
     }
 
     /**
      * Returns an absolute URL to the API with the given path.
      * @internal
      */
-    private uri(path: string) {
+    private _getRequestUrl(path: string) {
         return 'https://api.envato.com/' + path.replace(/^\/+/, '');
     }
 
-    /**
-     * Handles a response from the API, properly throwing errors or parsing the response as appropriate.
-     * @internal
-     */
-    private handleResponse(err: any, response: request.Response, body: any, resolve: Function, reject: Function) {
-        if (err) return reject(err);
-        if (response.statusCode !== 200) {
-            switch (response.statusCode) {
-                case 400: return reject(new Errors.BadRequestError(this.getErrorResponse(body)));
-                case 401: return reject(new Errors.UnauthorizedError(this.getErrorResponse(body)));
-                case 403: return reject(new Errors.AccessDeniedError(this.getErrorResponse(body)));
-                case 404: return reject(new Errors.NotFoundError(this.getErrorResponse(body)));
-                case 429: return reject(new Errors.TooManyRequestsError(this.getErrorResponse(body)));
-                case 500: return reject(new Errors.ServerError(this.getErrorResponse(body)));
-                default: return reject(new Errors.HttpError('Unknown error', response.statusCode, this.getErrorResponse(body)));
-            }
-        }
-
-        try {
-            return resolve(JSON.parse(body, (key, value) => {
-                let date !: Date;
-
-                if ((key.endsWith('_at') || key.endsWith('_until') || key.startsWith('last_')) && value) date = new Date(value);
-                else if ((key === 'month' || key === 'date') && value) date = new Date(value);
-
-                if (date && date.toString() !== 'Invalid Date') return date;
-                return value;
-            }));
-        }
-        catch (error) {
-            throw new Error(`Failed to parse response: ${error.message}`);
-        }
-    }
-
-    /**
-     * Returns an `ErrorResponse` instance from the given response body.
-     * @internal
-     */
-    private getErrorResponse(body: any) : Errors.ErrorResponse | undefined {
-        if (typeof body == 'string') {
-            try {
-                return JSON.parse(body);
-            }
-            catch (error) {
-                return undefined;
-            }
-        }
-
-        return {
-            error: 'Unknown error'
-        };
-    }
-
-    public on(event: 'debug', listener: (err: Error | undefined, response: request.Response, body: string) => void): this;
+    public on(event: 'debug', listener: (response: AxiosResponse<string>) => void): this;
     public on(event: 'renew', listener: (data: RefreshedToken) => void): this;
     public on(event: 'ratelimit', listener: (duration: number) => void): this;
     public on(event: 'resume', listener: () => void): this;
@@ -329,9 +291,9 @@ export interface ClientOptions {
     oauth ?: OAuth;
 
     /**
-     * Optional configuration for the underlying `request` library.
+     * Optional configuration for the underlying `axios` library.
      */
-    request ?: request.CoreOptions;
+    axios ?: AxiosRequestConfig;
 
     /**
      * If set to `true`, the client will automatically handle rate limits. Any blocked requests will be retried when
@@ -379,3 +341,4 @@ export interface IdentityResponse {
      */
     ttl: number;
 };
+

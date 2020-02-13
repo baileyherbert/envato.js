@@ -21,7 +21,6 @@ This is a library for working with the new Envato API.
 - Simplified error handling.
 - Handles rate limits and concurrency for you.
 - Full type hinting and autocompletion in modern editors.
-- Runs in modern web browsers.
 
 Envato.js extracts the relevant data from responses and returns them without any extra bloat. It also converts data
 where possible, such as converting timestamps into `Date` objects.

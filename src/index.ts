@@ -1,15 +1,3 @@
-import { Client } from './client';
-import { OAuth } from './oauth';
-import {
-    HttpError,
-    UnauthorizedError,
-    BadRequestError,
-    AccessDeniedError,
-    NotFoundError,
-    ServerError,
-    TooManyRequestsError
-} from './errors/http';
-
 /*
     Named exports
 */
@@ -64,7 +52,7 @@ export * from './types/catalog';
 export * from './types/market';
 export * from './types/private';
 
-export * from './errors/http';
+export * from './helpers/errors';
 
 /*
     Default export for easier importing in TypeScript projects

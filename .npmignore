@@ -2,3 +2,4 @@ src
 test
 .travis.yml
 tsconfig.json
+gulpfile.js

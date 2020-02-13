@@ -6,7 +6,8 @@
     "types": "types/index.d.ts",
     "scripts": {
         "build": "tsc",
-        "test": "mocha --timeout 30000"
+        "test": "mocha --timeout 30000",
+        "build:production": "gulp build"
     },
     "repository": {
         "type": "git",
@@ -24,18 +25,22 @@
     "homepage": "https://github.com/baileyherbert/envato.js",
     "keywords": [
         "envato",
-        "envato api"
+        "envato api",
+        "envato market"
     ],
     "dependencies": {
+        "@types/node": "^12.12.27",
         "axios": "^0.19.2",
         "qs": "^6.9.1"
     },
     "devDependencies": {
         "@types/chai": "^4.2.8",
         "@types/mocha": "^5.2.7",
-        "@types/node": "^12.12.26",
         "@types/qs": "^6.9.1",
         "chai": "^4.2.0",
+        "del": "^5.1.0",
+        "gulp": "^4.0.2",
+        "gulp-typescript": "^6.0.0-alpha.1",
         "mocha": "^6.2.2",
         "typescript": "^3.7.5"
     }

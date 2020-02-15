@@ -34,7 +34,6 @@
         "qs": "^6.9.1"
     },
     "devDependencies": {
-        "@types/chai": "^4.2.8",
         "@types/mocha": "^5.2.7",
         "@types/qs": "^6.9.1",
         "del": "^5.1.0",

@@ -1,11 +1,10 @@
 const { Client, NotFoundError, UnauthorizedError } = require('../dist');
-const { equal } = require('assert');
-const { expect } = require('chai');
+const assert = require('assert');
 
-const { CatalogClientGroup } = require('../dist/client/catalog');
-const { PrivateClientGroup } = require('../dist/client/private');
-const { StatsClientGroup } = require('../dist/client/stats');
-const { UserClientGroup } = require('../dist/client/user');
+const { CatalogEndpoints } = require('../dist/endpoints/catalog');
+const { PrivateEndpoints } = require('../dist/endpoints/private');
+const { StatsEndpoints } = require('../dist/endpoints/stats');
+const { UserEndpoints } = require('../dist/endpoints/user');
 
 describe('client', () => {
     let expiration = (new Date()).getTime() + 30000;
@@ -16,29 +15,29 @@ describe('client', () => {
     });
 
     it('returns expected values', () => {
-        equal(client.token, 'a');
-        equal(client.refreshToken, 'b');
-        equal(client.expiration, expiration);
+        assert(client.token === 'a');
+        assert(client.refreshToken === 'b');
+        assert(client.expiration === expiration);
     });
 
     it('returns endpoint helpers', () => {
-        expect(client.catalog).to.be.instanceOf(CatalogClientGroup);
-        expect(client.private).to.be.instanceOf(PrivateClientGroup);
-        expect(client.stats).to.be.instanceOf(StatsClientGroup);
-        expect(client.user).to.be.instanceOf(UserClientGroup);
+        assert(client.catalog instanceof CatalogEndpoints);
+        assert(client.private instanceof PrivateEndpoints);
+        assert(client.stats instanceof StatsEndpoints);
+        assert(client.user instanceof UserEndpoints);
     });
 
     it('properly calculates ttl', () => {
-        expect(client.ttl).to.be.within(28000, 30000);
+        assert(client.ttl >= 29500 && client.ttl <= 30000);
     });
 
     it('throws for unauthorized requests', async () => {
         try {
             await client.getIdentity();
-            fail('The erroneous request did not throw an error');
+            assert.fail('The erroneous request did not throw an error');
         }
         catch (error) {
-            expect(error).to.be.instanceOf(UnauthorizedError);
+            assert(error instanceof UnauthorizedError);
         }
     });
 
@@ -46,7 +45,8 @@ describe('client', () => {
     let shortClient = new Client('a');
 
     it('properly supports short instantiation', () => {
-        equal(shortClient.token, 'a');
+        assert(shortClient.token === 'a');
+        assert(typeof shortClient.refreshToken === 'undefined');
     });
 });
 
@@ -61,17 +61,17 @@ describe('personal client', () => {
 
     it('can retrieve identity', async () => {
         let identity = await client.getIdentity();
-        expect(identity.userId).to.equal(1908998, 'The returned user ID does not match the expected value (1908998)');
-        expect(identity.ttl).to.be.greaterThan(0, 'Got a faulty ttl');
+        assert(identity.userId === 1908998);
+        assert(identity.ttl > 0);
     });
 
     it('throws for erroneous requests', async () => {
         try {
             await client.get('/v3/not-found');
-            fail('The erroneous request did not throw an error');
+            assert.fail('The erroneous request did not throw an error');
         }
         catch (error) {
-            expect(error).to.be.instanceOf(NotFoundError);
+            assert(error instanceof NotFoundError);
         }
     });
 
@@ -79,25 +79,25 @@ describe('personal client', () => {
         it('can retrieve a collection', async () => {
             let collection = await client.catalog.getCollection(4551957);
 
-            expect(collection.collection.name).to.equal('Free Files of the Month');
-            expect(collection.items).length.to.be.greaterThan(1);
-            expect(collection.items[0].number_of_sales).to.be.a('number');
+            assert(collection.collection.name === 'Free Files of the Month');
+            assert(collection.items.length > 0);
+            assert(typeof collection.items[0].number_of_sales === 'number');
         });
 
         it('can retrieve an item', async () => {
             let item = await client.catalog.getItem(2833226);
 
-            expect(item.number_of_sales).to.be.greaterThan(0);
-            expect(item.author_username).to.equal('ThemeFusion');
-            expect(item.updated_at).to.be.instanceOf(Date, 'failed to parse timestamp into date object');
+            assert(item.number_of_sales > 0);
+            assert(item.author_username === 'ThemeFusion');
+            assert(item.updated_at instanceof Date);
         });
 
         it('can retrieve market categories', async () => {
             let response = await client.catalog.getCategories('themeforest');
 
-            expect(response).to.be.an('array');
-            expect(response).to.have.length.above(0);
-            expect(response[0].name).to.be.a('string');
+            assert(Array.isArray(response));
+            assert(response.length > 0);
+            assert(typeof response[0].name === 'string');
         });
     });
 
@@ -105,16 +105,16 @@ describe('personal client', () => {
         it('can retrieve account details', async () => {
             let response = await client.user.getAccountDetails('baileyherbert');
 
-            expect(response).to.be.an('object');
-            expect(response.username).to.equal('baileyherbert');
+            assert(typeof response === 'object');
+            assert(response.username === 'baileyherbert');
         });
 
         it('can retrieve collections', async () => {
             let response = await client.user.getCollections();
 
-            expect(response).to.be.an('array');
-            expect(response).to.have.length.above(0);
-            expect(response[0]).to.have.property('name');
+            assert(Array.isArray(response));
+            assert(response.length > 0);
+            assert('name' in response[0]);
         });
     });
 
@@ -122,38 +122,39 @@ describe('personal client', () => {
         it('can retrieve a sale via purchase code', async () => {
             let sale = await client.private.getSale(process.env.PURCHASE_CODE);
 
-            expect(sale).to.be.an('object');
-            expect(sale).to.have.property('buyer');
-            expect(sale).to.have.nested.property('item.id');
-            expect(sale.purchase_count).to.be.a('number');
-            expect(sale.sold_at).to.be.instanceOf(Date, 'failed to parse timestamp into date object');
-            expect(sale.supported_until).to.be.instanceOf(Date, 'failed to parse timestamp into date object');
+            assert(typeof sale === 'object');
+            assert('buyer' in sale);
+            assert('item' in sale);
+            assert('id' in sale.item);
+            assert(typeof sale.purchase_count === 'number');
+            assert(sale.sold_at instanceof Date);
+            assert(sale.supported_until instanceof Date);
         });
 
         it('returns undefined when looking up an invalid purchase code', async () => {
             try {
                 let res = await client.private.getSale('this-does-not-exist');
-                expect(res).to.equal(undefined);
+                assert(typeof res === 'undefined');
             }
             catch (error) {
-                expect.fail('unexpectedly threw an error ' + error.toString());
+                assert.fail('unexpectedly threw an error ' + error.toString());
             }
         });
 
         it('can retrieve username', async () => {
             let response = await client.private.getUsername();
-            expect(response).to.equal('baileyherbert');
+            assert(response === 'baileyherbert');
         });
 
         it('can retrieve email', async () => {
             let response = await client.private.getEmail();
-            expect(response).to.have.string('@');
+            assert(response.indexOf('@') > 0);
         });
 
         it('can retrieve monthly sales', async () => {
             let response = await client.private.getMonthlySales();
-            expect(response).to.be.an('array');
-            expect(response).to.have.length.above(0);
+            assert(Array.isArray(response));
+            assert(response.length > 0);
         });
     });
 });

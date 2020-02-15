@@ -1,14 +1,18 @@
 import { Client } from '../client';
-import { Collection, Item, SearchItemsOptions, SearchCommentsOptions, ItemComment, ItemShort, ItemMedium } from '../types/catalog';
-import { MarketName } from '../types/market';
+import { ItemSearchOptions, CommentSearchOptions } from '../types/options';
+import { MarketName, Collection, Item, ItemComment, ItemShort, ItemMedium } from '../types/api';
 
-import * as url from '../util/url';
-import * as mutate from '../util/mutate';
-import * as errors from '../util/errors';
+import url from '../util/url';
+import mutate from '../util/mutate';
+import errors from '../util/errors';
 
-export class CatalogClientGroup {
+export class CatalogEndpoints {
 
-    public constructor(private client: Client) {}
+    private _client: Client;
+
+    public constructor(client: Client) {
+        this._client = client;
+    }
 
     /**
      * Returns details of, and items contained within, a public collection. Returns `undefined` if the specified
@@ -18,7 +22,7 @@ export class CatalogClientGroup {
      * @param page Page number.
      */
     public getCollection(id: number, page?: number) {
-        return errors.find(this.client.get<GetCollectionResponse>(url.build('/v3/market/catalog/collection', {
+        return errors.find(this._client.get<ICollectionResponse>(url.build('/v3/market/catalog/collection', {
             id, page
         })));
     }
@@ -30,7 +34,7 @@ export class CatalogClientGroup {
      * @param id The numeric ID of the item to return.
      */
     public getItem(id: number) {
-        return errors.find(this.client.get<GetItemResponse>(url.build('/v3/market/catalog/item', {
+        return errors.find(this._client.get<Item>(url.build('/v3/market/catalog/item', {
             id
         })));
     }
@@ -43,7 +47,7 @@ export class CatalogClientGroup {
      * @param id The numeric ID of the item to return.
      */
     public getItemVersion(id: number) {
-        return errors.find(this.client.get<GetItemVersionResponse>(url.build('/v3/market/catalog/item-version', {
+        return errors.find(this._client.get<IItemVersionResponse>(url.build('/v3/market/catalog/item-version', {
             id
         })));
     }
@@ -51,15 +55,15 @@ export class CatalogClientGroup {
     /**
      * @param options The search options.
      */
-    public searchItems(options: SearchItemsOptions = {}) {
-        return this.client.get<SearchItemsResponse>(url.build('/v1/discovery/search/search/item', options));
+    public searchItems(options: ItemSearchOptions = {}) {
+        return this._client.get<ISearchItemsResponse>(url.build('/v1/discovery/search/search/item', options));
     }
 
     /**
      * @param options The search options.
      */
-    public searchComments(options: SearchCommentsOptions) {
-        return this.client.get<SearchCommentsResponse>(url.build('/v1/discovery/search/search/comment', options));
+    public searchComments(options: CommentSearchOptions) {
+        return this._client.get<ISearchCommentsResponse>(url.build('/v1/discovery/search/search/comment', options));
     }
 
     /**
@@ -67,10 +71,10 @@ export class CatalogClientGroup {
      *
      * @param site Site.
      */
-    public async getPopularItems(site: MarketName) : Promise<GetPopularItemsResponse> {
+    public async getPopularItems(site: MarketName) : Promise<IPopularItemsResponse> {
         return mutate.scope(
             'popular',
-            await this.client.get<any>(url.prepare('/v1/market/popular:%s.json', site))
+            await this._client.get(url.prepare('/v1/market/popular:%s.json', site))
         );
     }
 
@@ -79,10 +83,10 @@ export class CatalogClientGroup {
      *
      * @param site Site.
      */
-    public async getCategories(site: MarketName) : Promise<GetCategoriesResponse> {
+    public async getCategories(site: MarketName) : Promise<ICategoriesResponse> {
         return mutate.scope(
             'categories',
-            await this.client.get<any>(url.prepare('/v1/market/categories:%s.json', site))
+            await this._client.get(url.prepare('/v1/market/categories:%s.json', site))
         );
     }
 
@@ -91,10 +95,10 @@ export class CatalogClientGroup {
      *
      * @param id Item ID.
      */
-    public async getItemPrices(id: number) : Promise<GetItemPricesResponse> {
+    public async getItemPrices(id: number) : Promise<IItemPricesResponse> {
         return mutate.scope(
             'item-prices',
-            await this.client.get<any>(url.prepare('/v1/market/item-prices:%d.json', id))
+            await this._client.get(url.prepare('/v1/market/item-prices:%d.json', id))
         );
     }
 
@@ -104,10 +108,10 @@ export class CatalogClientGroup {
      * @param site Site.
      * @param category Category.
      */
-    public async getNewFiles(site: MarketName, category: string) : Promise<GetNewFilesResponse> {
+    public async getNewFiles(site: MarketName, category: string) : Promise<ItemShort[]> {
         return mutate.scope(
             'new-files',
-            await this.client.get<any>(url.prepare('/v1/market/new-files:%s,%s.json', site, category))
+            await this._client.get(url.prepare('/v1/market/new-files:%s,%s.json', site, category))
         );
     }
 
@@ -116,10 +120,10 @@ export class CatalogClientGroup {
      *
      * @param site Site.
      */
-    public async getFeatures(site: MarketName) : Promise<GetFeaturesResponse> {
+    public async getFeatures(site: MarketName) : Promise<IFeaturesResponse> {
         return mutate.scope(
             'features',
-            await this.client.get<any>(url.prepare('/v1/market/features:%s.json', site))
+            await this._client.get(url.prepare('/v1/market/features:%s.json', site))
         );
     }
 
@@ -131,16 +135,16 @@ export class CatalogClientGroup {
      *
      * @param site Site.
      */
-    public async getRandomNewFiles(site: MarketName) : Promise<GetRandomNewFilesResponse> {
+    public async getRandomNewFiles(site: MarketName) : Promise<ItemShort[]> {
         return mutate.scope(
             'random-new-files',
-            await this.client.get<any>(url.prepare('/v1/market/random-new-files:%s.json', site))
+            await this._client.get(url.prepare('/v1/market/random-new-files:%s.json', site))
         );
     }
 
 }
 
-export type GetCollectionResponse = {
+export interface ICollectionResponse {
     collection: Collection,
     items: Item[],
     pagination: {
@@ -150,9 +154,7 @@ export type GetCollectionResponse = {
     }
 };
 
-export type GetItemResponse = Item;
-
-export type GetItemVersionResponse = {
+export interface IItemVersionResponse {
     /**
      * Version of the latest Optional Wordpress Theme attachment available for item (if any).
      */
@@ -164,7 +166,7 @@ export type GetItemVersionResponse = {
     wordpress_plugin_latest_version ?: string;
 };
 
-export type SearchItemsResponse = {
+export interface ISearchItemsResponse {
     took: number;
     matches: Item[];
     item ?: Item;
@@ -183,7 +185,7 @@ export type SearchItemsResponse = {
     suggestions: any[];
 };
 
-export type SearchCommentsResponse = {
+export interface ISearchCommentsResponse {
     took: number;
     matches: ItemComment[];
     timed_out: boolean;
@@ -196,7 +198,7 @@ export type SearchCommentsResponse = {
     },
 };
 
-export type GetPopularItemsResponse = {
+export interface IPopularItemsResponse {
     items_last_week: ItemShort[],
     items_last_three_months: ItemShort[],
     authors_last_month: {
@@ -207,19 +209,17 @@ export type GetPopularItemsResponse = {
     }[];
 };
 
-export type GetCategoriesResponse = {
+export interface ICategoriesResponse {
     name: string;
     path: string;
 }[];
 
-export type GetItemPricesResponse = {
+export interface IItemPricesResponse {
     license: string;
     price: string;
 }[];
 
-export type GetNewFilesResponse = ItemShort[];
-
-export type GetFeaturesResponse = {
+export interface IFeaturesResponse {
     featured_file: ItemMedium;
     featured_author: {
         id: string;
@@ -229,5 +229,3 @@ export type GetFeaturesResponse = {
     }
     free_file: ItemMedium;
 };
-
-export type GetRandomNewFilesResponse =  ItemShort[];

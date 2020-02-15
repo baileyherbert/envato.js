@@ -14,3 +14,5 @@ export function find<T>(promise: Promise<T>) : Promise<T | undefined> {
         });
     });
 }
+
+export default { find };

@@ -1,8 +1,7 @@
 import { Client } from '../client';
-import { Collection, Item, SearchItemsOptions, SearchCommentsOptions, ItemComment, ItemShort, ItemMedium } from '../types/catalog';
-import { MarketName } from '../types/market';
-export declare class CatalogClientGroup {
-    private client;
+import { ItemSearchOptions, CommentSearchOptions } from '../types/options';
+import { MarketName, Collection, Item, ItemComment, ItemShort, ItemMedium } from '../types/api';
+export declare class CatalogEndpoints {
     constructor(client: Client);
     /**
      * Returns details of, and items contained within, a public collection. Returns `undefined` if the specified
@@ -11,7 +10,7 @@ export declare class CatalogClientGroup {
      * @param id The numeric ID of the collection to return.
      * @param page Page number.
      */
-    getCollection(id: number, page?: number): Promise<GetCollectionResponse | undefined>;
+    getCollection(id: number, page?: number): Promise<ICollectionResponse | undefined>;
     /**
      * Returns all details of a particular item on Envato Market. Returns `undefined` if the specified item is not
      * found.
@@ -26,46 +25,46 @@ export declare class CatalogClientGroup {
      *
      * @param id The numeric ID of the item to return.
      */
-    getItemVersion(id: number): Promise<GetItemVersionResponse | undefined>;
+    getItemVersion(id: number): Promise<IItemVersionResponse | undefined>;
     /**
      * @param options The search options.
      */
-    searchItems(options?: SearchItemsOptions): Promise<SearchItemsResponse>;
+    searchItems(options?: ItemSearchOptions): Promise<ISearchItemsResponse>;
     /**
      * @param options The search options.
      */
-    searchComments(options: SearchCommentsOptions): Promise<SearchCommentsResponse>;
+    searchComments(options: CommentSearchOptions): Promise<ISearchCommentsResponse>;
     /**
      * Returns the popular files for a particular site.
      *
      * @param site Site.
      */
-    getPopularItems(site: MarketName): Promise<GetPopularItemsResponse>;
+    getPopularItems(site: MarketName): Promise<IPopularItemsResponse>;
     /**
      * Lists the categories of a particular site.
      *
      * @param site Site.
      */
-    getCategories(site: MarketName): Promise<GetCategoriesResponse>;
+    getCategories(site: MarketName): Promise<ICategoriesResponse>;
     /**
      * Return available licenses and prices for the given item ID.
      *
      * @param id Item ID.
      */
-    getItemPrices(id: number): Promise<GetItemPricesResponse>;
+    getItemPrices(id: number): Promise<IItemPricesResponse>;
     /**
      * New files, recently uploaded to a particular site.
      *
      * @param site Site.
      * @param category Category.
      */
-    getNewFiles(site: MarketName, category: string): Promise<GetNewFilesResponse>;
+    getNewFiles(site: MarketName, category: string): Promise<ItemShort[]>;
     /**
      * Shows the current site features.
      *
      * @param site Site.
      */
-    getFeatures(site: MarketName): Promise<GetFeaturesResponse>;
+    getFeatures(site: MarketName): Promise<IFeaturesResponse>;
     /**
      * Shows a random list of newly uploaded files from a particular site (i.e. like the homepage).
      *
@@ -74,9 +73,9 @@ export declare class CatalogClientGroup {
      *
      * @param site Site.
      */
-    getRandomNewFiles(site: MarketName): Promise<GetRandomNewFilesResponse>;
+    getRandomNewFiles(site: MarketName): Promise<ItemShort[]>;
 }
-export declare type GetCollectionResponse = {
+export interface ICollectionResponse {
     collection: Collection;
     items: Item[];
     pagination: {
@@ -84,9 +83,8 @@ export declare type GetCollectionResponse = {
         pages: number;
         page_size: number;
     };
-};
-export declare type GetItemResponse = Item;
-export declare type GetItemVersionResponse = {
+}
+export interface IItemVersionResponse {
     /**
      * Version of the latest Optional Wordpress Theme attachment available for item (if any).
      */
@@ -95,8 +93,8 @@ export declare type GetItemVersionResponse = {
      * Version of the latest Optional Wordpress Plugin attachment available for item (if any).
      */
     wordpress_plugin_latest_version?: string;
-};
-export declare type SearchItemsResponse = {
+}
+export interface ISearchItemsResponse {
     took: number;
     matches: Item[];
     item?: Item;
@@ -113,8 +111,8 @@ export declare type SearchItemsResponse = {
         [aggName: string]: any;
     }[];
     suggestions: any[];
-};
-export declare type SearchCommentsResponse = {
+}
+export interface ISearchCommentsResponse {
     took: number;
     matches: ItemComment[];
     timed_out: boolean;
@@ -125,8 +123,8 @@ export declare type SearchCommentsResponse = {
         first_page_url?: string;
         last_page_url?: string;
     };
-};
-export declare type GetPopularItemsResponse = {
+}
+export interface IPopularItemsResponse {
     items_last_week: ItemShort[];
     items_last_three_months: ItemShort[];
     authors_last_month: {
@@ -135,17 +133,16 @@ export declare type GetPopularItemsResponse = {
         url: string;
         image: string;
     }[];
-};
-export declare type GetCategoriesResponse = {
+}
+export interface ICategoriesResponse {
     name: string;
     path: string;
-}[];
-export declare type GetItemPricesResponse = {
+}
+export interface IItemPricesResponse {
     license: string;
     price: string;
-}[];
-export declare type GetNewFilesResponse = ItemShort[];
-export declare type GetFeaturesResponse = {
+}
+export interface IFeaturesResponse {
     featured_file: ItemMedium;
     featured_author: {
         id: string;
@@ -154,5 +151,4 @@ export declare type GetFeaturesResponse = {
         thumbnail: string;
     };
     free_file: ItemMedium;
-};
-export declare type GetRandomNewFilesResponse = ItemShort[];
+}

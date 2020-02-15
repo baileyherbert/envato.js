@@ -1,8 +1,14 @@
 import { Client } from './client';
 import { AxiosRequestConfig } from 'axios';
+/**
+ * Helper class for OAuth applications. Includes methods to both authorize new clients and renew tokens.
+ */
 export declare class OAuth {
-    private options;
     constructor(options: OAuthOptions);
+    /**
+     * Returns the URL that you should redirect users to in order to authenticate with the Envato API for this app.
+     * This will include the `client_id` and `redirect_uri` from your options.
+     */
     getRedirectUrl(): string;
     /**
      * Authorizes the user based on the given authentication code and returns a `Client` with their access token,
@@ -16,9 +22,9 @@ export declare class OAuth {
      *
      * @param client The client whose access token needs to be renewed.
      */
-    renew(client: Client): Promise<RefreshedToken>;
+    renew(client: Client): Promise<IRefreshedToken>;
 }
-export declare type OAuthOptions = {
+export interface OAuthOptions {
     /**
      * The application's unique ID.
      */
@@ -47,9 +53,20 @@ export declare type OAuthOptions = {
      * Optional configuration for the underlying `axios` library.
      */
     axios?: AxiosRequestConfig;
-};
-export declare type RefreshedToken = {
+}
+export interface IResponseData {
+    refresh_token: string;
+    token_type: string;
+    access_token: string;
+    expires_in: number;
+}
+export interface IRefreshResponseData {
+    token_type: string;
+    access_token: string;
+    expires_in: number;
+}
+export interface IRefreshedToken {
     token: string;
     expiration: number;
     [key: string]: any;
-};
+}

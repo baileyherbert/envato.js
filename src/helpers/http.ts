@@ -5,7 +5,7 @@ import { HttpError, BadRequestError, UnauthorizedError, AccessDeniedError, NotFo
 export class Http {
 
 	public static async fetch<T>(options: FetchOptions) : Promise<FetchResponse<T>> {
-		let { method, url, headers, form } = options;
+		const { method, url, headers, form } = options;
 		let data : string | undefined;
 
 		// Encode any forms as a query string
@@ -17,11 +17,11 @@ export class Http {
 		// Ensure there's a user agent
 		this._applyUserAgent(headers);
 
-		let validateStatus = () => true;
-		let transformResponse = (data: any) => data.toString();
-		let response = await axios({ ...options.axios, method, url, data, headers, validateStatus, transformResponse });
-		let status = response.status;
-		let body = this._decodeResponse(response.data);
+		const validateStatus = () => true;
+		const transformResponse = (data: any) => data.toString();
+		const response = await axios({ ...options.axios, method, url, data, headers, validateStatus, transformResponse });
+		const status = response.status;
+		const body = this._decodeResponse(response.data);
 
 		if (status === 200 && typeof body === 'undefined') {
 			throw new Error('Error parsing OK response');
@@ -74,7 +74,7 @@ export class Http {
 	}
 
 	private static _applyUserAgent(headers: RequestHeaders) {
-		for (let name in headers) {
+		for (const name in headers) {
 			if (name.toLowerCase() === 'user-agent') {
 				if (!headers[name]) {
 					headers[name] = 'Envato.js (https://github.com/baileyherbert/envato.js)';

@@ -32,8 +32,8 @@ export class Queue extends EventEmitter {
      * @param retryAfter Number of seconds to wait before the next request.
      */
     public registerThrottleEvent(retryAfter ?: number) {
-        let duration = (retryAfter || 65) * 1000;
-        let deferring = this.isDeferring();
+        const duration = (retryAfter || 65) * 1000;
+        const deferring = this.isDeferring();
         this.retryTime = this.getTime() + duration;
 
         // If we weren't deferring before, then emit events
@@ -55,8 +55,8 @@ export class Queue extends EventEmitter {
      */
     public defer() {
         return new Promise(resolve => {
-            let current = this.getTime();
-            let remaining = this.retryTime - current;
+            const current = this.getTime();
+            const remaining = this.retryTime - current;
 
             if (current > 0) {
                 return setTimeout(() => {

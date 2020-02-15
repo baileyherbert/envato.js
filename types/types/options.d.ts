@@ -1,123 +1,8 @@
-import { MarketDomain } from './market';
-export declare type Collection = {
-    id: number;
-    name: string;
-    description: string;
-    private: boolean;
-    item_count: number;
-    special_role?: string;
-    image: string;
-};
-export declare type Item = {
-    id: number;
-    name: string;
-    number_of_sales: number;
-    author_username: string;
-    author_url: string;
-    url: string;
-    updated_at: Date;
-    attributes: Attribute[];
-    description: string;
-    description_html: string;
-    site: MarketDomain;
-    classification: string;
-    classification_url: string;
-    price_cents: number;
-    author_image: string;
-    summary: string;
-    wordpress_theme_metadata?: {
-        theme_name: string;
-        author_name: string;
-        version: string;
-        description: string;
-    };
-    rating: number;
-    rating_count: number;
-    published_at: Date;
-    trending: boolean;
-    tags: string[];
-    previews: {
-        thumbnail_preview?: {
-            small_url: string;
-            large_url: string;
-            large_width: number;
-            large_height: number;
-        };
-        icon_with_thumbnail_preview?: {
-            icon_url: string;
-            thumbnail_url: string;
-            thumbnail_width: number;
-            thumbnail_height: number;
-        };
-        icon_with_landscape_preview?: {
-            icon_url: string;
-            landscape_url: string;
-        };
-        icon_with_square_preview?: {
-            icon_url: string;
-            square_url: string;
-            image_urls: Image[];
-        };
-        icon_with_audio_preview?: {
-            icon_url: string;
-            mp3_url: string;
-            mp3_preview_download_url?: string;
-            mp3_id: string;
-            length: {
-                hours: number;
-                minutes: number;
-                seconds: number;
-            };
-        };
-        icon_with_video_preview?: {
-            icon_url: string;
-            landscape_url: string;
-            video_url: string;
-            type: string;
-        };
-        live_site?: {
-            url: string;
-        };
-        icon_preview?: {
-            icon_url: string;
-            type: string;
-        };
-        landscape_preview?: {
-            landscape_url: string;
-            image_urls?: Image[];
-        };
-    };
-};
-export declare type Image = {
-    name?: string;
-    url: string;
-    width: number;
-    height: number;
-};
-export declare type ItemShort = {
-    id: number;
-    item: string;
-    url: string;
-    user: string;
-    thumbnail: string;
-    sales: string;
-    rating: string;
-    rating_decimal: string;
-    cost: string;
-};
-export declare type ItemMedium = ItemShort & {
-    uploaded_on: string;
-    last_update: Date;
-    tags: string;
-    category: string;
-    live_preview_url: string;
-};
-export declare type Attribute = {
-    name: string;
-    value: string | string[];
-    label: string;
-};
-export declare type SearchItemsOptions = {
+import { MarketDomain } from './api';
+/**
+ * Options used to search items on the marketplaces.
+ */
+export interface ItemSearchOptions {
     /**
      * The string to search for.
      */
@@ -265,8 +150,11 @@ export declare type SearchItemsOptions = {
      * Sort direction.
      */
     sort_direction?: 'asc' | 'desc';
-};
-export declare type SearchCommentsOptions = {
+}
+/**
+ * Options used to search comments.
+ */
+export interface CommentSearchOptions {
     /**
      * The item id to search for comments on.
      */
@@ -287,29 +175,54 @@ export declare type SearchCommentsOptions = {
      * How to sort results.
      */
     sort_by?: 'relevance' | 'newest' | 'oldest';
-};
-export declare type ItemComment = {
-    id: string;
-    item_id: string;
-    item_url: string;
-    item_name: string;
-    url: string;
-    site: string;
-    item_author_id: string;
-    item_author_url: string;
-    last_comment_at: Date;
-    conversation: ItemConversation[];
-    total_converstations: string;
-    buyer_and_author: string;
-    highlightable: string;
-};
-export declare type ItemConversation = {
-    id: string;
-    username: string;
-    content: string;
-    created_at: Date;
-    author_comment: boolean;
-    hidden_by_complaint: boolean;
-    complaint_state: 'no_complaint' | 'ignored' | 'ignored_with_edit' | 'pending' | 'upheld';
-    profile_image_url: string;
-};
+}
+/**
+ * Options used when searching for or retrieving statements.
+ */
+export interface StatementOptions {
+    /**
+     * A page number to start the results from.
+     */
+    page?: number;
+    /**
+     * The from date in `YYYY-MM-DD` format.
+     */
+    from_date?: string;
+    /**
+     * The to date in `YYYY-MM-DD` format.
+     */
+    to_date?: string;
+    /**
+     * Filter to a specific transaction type.
+     */
+    type?: string;
+    /**
+     * Filter to a particular Envato Market site.
+     */
+    site?: string;
+}
+/**
+ * Options used to retrieve a purchase on a buyer's account.
+ */
+export interface ListPurchasesOptions {
+    /**
+     * Optionally filter for WordPress plugins and themes.
+     */
+    filter_by?: 'wordpress-themes' | 'wordpress-plugins';
+    /**
+     * Optional page number (default is 1).
+     */
+    page?: number;
+    /**
+     * Include more item details.
+     */
+    include_all_item_details?: boolean | 'true' | 'false';
+}
+/**
+ * Options used when retrieving a download link to a purchase.
+ */
+export interface DownloadLinkOptions {
+    item_id?: number;
+    purchase_code?: string;
+    shorten_url?: boolean | 'true' | 'false';
+}

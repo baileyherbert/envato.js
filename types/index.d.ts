@@ -1,14 +1,13 @@
 import { Client, ClientOptions, IdentityResponse } from './client';
-import { OAuth, OAuthOptions, RefreshedToken } from './oauth';
+import { OAuth, OAuthOptions, IRefreshedToken } from './oauth';
 import { AccessDeniedError, BadRequestError, ErrorResponse, HttpError, NotFoundError, ServerError, TooManyRequestsError, UnauthorizedError } from './helpers/errors';
-import { GetCategoriesResponse, CatalogClientGroup, GetCollectionResponse, GetFeaturesResponse, GetItemPricesResponse, GetItemResponse, GetItemVersionResponse, GetNewFilesResponse, GetPopularItemsResponse, GetRandomNewFilesResponse, SearchCommentsResponse, SearchItemsResponse } from './client/catalog';
-import { GetDownloadLinkResponse, GetEmailResponse, GetMonthlySalesResponse, GetPrivateAccountDetailsResponse, GetPurchaseResponse, GetPurchasesFromAppCreatorResponse, GetPurchasesResponse, GetSaleResponse, GetSalesResponse, GetStatementResponse, GetUsernameResponse, PrivateClientGroup } from './client/private';
-import { GetFilesPerCategoryResponse, GetTotalItemsResponse, GetTotalUsersResponse, StatsClientGroup } from './client/stats';
-import { GetAccountDetailsResponse, GetBadgesResponse, GetCollectionsResponse, GetItemsBySiteResponse, GetNewItemsResponse, GetPrivateCollectionResponse, UserClientGroup } from './client/user';
-import { Attribute, Collection, Image, Item, ItemComment, ItemConversation, ItemMedium, ItemShort, SearchCommentsOptions, SearchItemsOptions } from './types/catalog';
-import { MarketDomain, MarketName } from './types/market';
-import { GetDownloadLinkOptions, GetPurchasesOptions, GetStatementOptions, Sale } from './types/private';
-export { Client, ClientOptions, IdentityResponse, OAuth, OAuthOptions, RefreshedToken, AccessDeniedError, BadRequestError, ErrorResponse, HttpError, NotFoundError, ServerError, TooManyRequestsError, UnauthorizedError, GetCategoriesResponse, CatalogClientGroup, GetCollectionResponse, GetFeaturesResponse, GetItemPricesResponse, GetItemResponse, GetItemVersionResponse, GetNewFilesResponse, GetPopularItemsResponse, GetRandomNewFilesResponse, SearchCommentsResponse, SearchItemsResponse, GetDownloadLinkResponse, GetEmailResponse, GetMonthlySalesResponse, GetPrivateAccountDetailsResponse, GetPurchaseResponse, GetPurchasesFromAppCreatorResponse, GetPurchasesResponse, GetSaleResponse, GetSalesResponse, GetStatementResponse, GetUsernameResponse, PrivateClientGroup, GetFilesPerCategoryResponse, GetTotalItemsResponse, GetTotalUsersResponse, StatsClientGroup, GetAccountDetailsResponse, GetBadgesResponse, GetCollectionsResponse, GetItemsBySiteResponse, GetNewItemsResponse, GetPrivateCollectionResponse, UserClientGroup, Attribute, Collection, Image, Item, ItemComment, ItemConversation, ItemMedium, ItemShort, SearchCommentsOptions, SearchItemsOptions, MarketDomain, MarketName, GetDownloadLinkOptions, GetPurchasesOptions, GetStatementOptions, Sale };
+import { ICategoriesResponse, CatalogEndpoints, ICollectionResponse, IFeaturesResponse, IItemPricesResponse, IItemVersionResponse, IPopularItemsResponse, ISearchCommentsResponse, ISearchItemsResponse } from './endpoints/catalog';
+import { IDownloadLinkResponse, IEmailResponse, IMonthlySalesResponse, IPrivateAccountDetailsResponse, IPurchaseResponse, IPurchasesFromAppCreatorResponse, IPurchasesResponse, ISaleResponse, IStatementResponse, IUsernameResponse, PrivateEndpoints } from './endpoints/private';
+import { IFilesPerCategoryResponse, StatsEndpoints } from './endpoints/stats';
+import { IAccountDetailsResponse, IBadgesResponse, IItemsBySiteResponse, IPrivateCollectionResponse, UserEndpoints } from './endpoints/user';
+import { MarketDomain, MarketName, Collection, Item, ItemAttribute, ItemComment, ItemConversation, ItemImage, ItemMedium, ItemShort, Sale } from './types/api';
+import { CommentSearchOptions, DownloadLinkOptions, ItemSearchOptions, ListPurchasesOptions, StatementOptions } from './types/options';
+export { Client, ClientOptions, IdentityResponse, OAuth, OAuthOptions, IRefreshedToken, AccessDeniedError, BadRequestError, ErrorResponse, HttpError, NotFoundError, ServerError, TooManyRequestsError, UnauthorizedError, ICategoriesResponse, CatalogEndpoints, ICollectionResponse, IFeaturesResponse, IItemPricesResponse, IItemVersionResponse, IPopularItemsResponse, ISearchCommentsResponse, ISearchItemsResponse, IDownloadLinkResponse, IEmailResponse, IMonthlySalesResponse, IPrivateAccountDetailsResponse, IPurchaseResponse, IPurchasesFromAppCreatorResponse, IPurchasesResponse, ISaleResponse, IStatementResponse, IUsernameResponse, PrivateEndpoints, IFilesPerCategoryResponse, StatsEndpoints, IAccountDetailsResponse, IBadgesResponse, IItemsBySiteResponse, IPrivateCollectionResponse, UserEndpoints, MarketDomain, MarketName, Collection, Item, ItemAttribute, ItemComment, ItemConversation, ItemImage, ItemMedium, ItemShort, Sale, CommentSearchOptions, DownloadLinkOptions, ItemSearchOptions, ListPurchasesOptions, StatementOptions };
 declare const _default: {
     Client: typeof Client;
     OAuth: typeof OAuth;
@@ -19,9 +18,9 @@ declare const _default: {
     ServerError: typeof ServerError;
     TooManyRequestsError: typeof TooManyRequestsError;
     UnauthorizedError: typeof UnauthorizedError;
-    CatalogClientGroup: typeof CatalogClientGroup;
-    PrivateClientGroup: typeof PrivateClientGroup;
-    StatsClientGroup: typeof StatsClientGroup;
-    UserClientGroup: typeof UserClientGroup;
+    CatalogEndpoints: typeof CatalogEndpoints;
+    PrivateEndpoints: typeof PrivateEndpoints;
+    StatsEndpoints: typeof StatsEndpoints;
+    UserEndpoints: typeof UserEndpoints;
 };
 export default _default;

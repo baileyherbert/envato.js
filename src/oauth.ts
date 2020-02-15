@@ -1,19 +1,28 @@
-import * as url from './util/url';
 import { Client } from './client';
 import { AxiosRequestConfig } from 'axios';
-import { Http } from './helpers/http';
+import { Http, RequestForm, FetchResponse } from './helpers/http';
+import url from './util/url';
 
+/**
+ * Helper class for OAuth applications. Includes methods to both authorize new clients and renew tokens.
+ */
 export class OAuth {
 
-    public constructor(private options: OAuthOptions) {
+    private _options: OAuthOptions;
 
+    public constructor(options: OAuthOptions) {
+        this._options = options;
     }
 
+    /**
+     * Returns the URL that you should redirect users to in order to authenticate with the Envato API for this app.
+     * This will include the `client_id` and `redirect_uri` from your options.
+     */
     public getRedirectUrl() {
         return url.build('https://api.envato.com/authorization', {
             response_type: 'code',
-            client_id: this.options.client_id,
-            redirect_uri: this.options.redirect_uri
+            client_id: this._options.client_id,
+            redirect_uri: this._options.redirect_uri
         });
     }
 
@@ -23,43 +32,28 @@ export class OAuth {
      *
      * @param code The single-use authentication code returned from the Envato authorization screen.
      */
-    public getClient(code: string) : Promise<Client> {
-        return new Promise(async (resolve, reject) => {
-            try {
-                let url = 'https://api.envato.com/token';
-                let headers = { 'User-Agent': this.options.userAgent };
-                let axios = this.options.axios;
-                let form = {
-                    grant_type: 'authorization_code',
-                    client_id: this.options.client_id,
-                    client_secret: this.options.client_secret,
-                    code
-                };
+    public async getClient(code: string) : Promise<Client> {
+        const { body, statusError, response } = await this._sendRequest<IResponseData>({
+            grant_type: 'authorization_code',
+            client_id: this._options.client_id,
+            client_secret: this._options.client_secret,
+            code
+        });
 
-                let res = await Http.fetch<ResponseData>({ url, headers, form, axios });
-                let data = res.body;
+        if (statusError) {
+            throw statusError;
+        }
 
-                // If the status code isn't 200, then statusError will have an HttpError instance that we can throw
-                if (res.statusError) {
-                    return reject(res.statusError);
-                }
+        if (!body.token_type) {
+            throw new Error('Unexpected response from API when renewing token: \n' + response.data);
+        }
 
-                // Make sure the response includes a token
-                if (!data.token_type) {
-                    return reject(new Error('Unexpected response from API when renewing token: \n' + res.response.data));
-                }
-
-                resolve(new Client({
-                    token: data.access_token,
-                    refreshToken: data.refresh_token,
-                    userAgent: this.options.userAgent,
-                    expiration: (new Date()).getTime() + (data.expires_in * 1000) - 1000,
-                    oauth: this
-                }));
-            }
-            catch (error) {
-                reject(error);
-            }
+        return new Client({
+            token: body.access_token,
+            refreshToken: body.refresh_token,
+            userAgent: this._options.userAgent,
+            expiration: (new Date()).getTime() + (body.expires_in * 1000) - 1000,
+            oauth: this
         });
     }
 
@@ -68,48 +62,40 @@ export class OAuth {
      *
      * @param client The client whose access token needs to be renewed.
      */
-    public renew(client: Client) : Promise<RefreshedToken> {
-        return new Promise(async (resolve, reject) => {
-            try {
-                let url = 'https://api.envato.com/token';
-                let headers = { 'User-Agent': this.options.userAgent };
-                let axios = this.options.axios;
-                let form = {
-                    grant_type: 'refresh_token',
-                    client_id: this.options.client_id,
-                    client_secret: this.options.client_secret,
-                    refresh_token: client.refreshToken
-                };
-
-                let res = await Http.fetch<RefreshResponseData>({ url, headers, form, axios });
-                let data = res.body;
-
-                // If the status code isn't 200, then statusError will have an HttpError instance that we can throw
-                if (res.statusError) {
-                    return reject(res.statusError);
-                }
-
-                // Make sure the response includes a token
-                if (!data.token_type) {
-                    return reject(new Error('Unexpected response from API when renewing token: \n' + res.response.data));
-                }
-
-                resolve({
-                    token: data.access_token,
-                    access_token: data.access_token,
-                    expiration: (new Date()).getTime() + (data.expires_in * 1000) - 1000
-                });
-            }
-            catch (error) {
-                reject(error);
-            }
+    public async renew(client: Client) : Promise<IRefreshedToken> {
+        const { response, body, statusError } = await this._sendRequest<IRefreshResponseData>({
+            grant_type: 'refresh_token',
+            client_id: this._options.client_id,
+            client_secret: this._options.client_secret,
+            refresh_token: client.refreshToken
         });
+
+        if (statusError) {
+            throw statusError;
+        }
+
+        if (!body.token_type) {
+            throw new Error('Unexpected response from API when renewing token: \n' + response.data);
+        }
+
+        return {
+            token: body.access_token,
+            access_token: body.access_token,
+            expiration: (new Date()).getTime() + (body.expires_in * 1000) - 1000
+        };
+    }
+
+    private async _sendRequest<T>(form: RequestForm) : Promise<FetchResponse<T>> {
+        const url = 'https://api.envato.com/token';
+        const headers = { 'User-Agent': this._options.userAgent };
+        const axios = this._options.axios;
+
+        return await Http.fetch<T>({ url, headers, axios, form });
     }
 
 }
 
-export type OAuthOptions = {
-
+export interface OAuthOptions {
     /**
      * The application's unique ID.
      */
@@ -136,29 +122,28 @@ export type OAuthOptions = {
      * - `"Support forum authentication & license verification"`
      * - `"Gathering data on items"`
      */
-    userAgent ?: string;
+    userAgent?: string;
 
     /**
      * Optional configuration for the underlying `axios` library.
      */
-    axios ?: AxiosRequestConfig;
-
+    axios?: AxiosRequestConfig;
 };
 
-type ResponseData = {
+export interface IResponseData {
     refresh_token: string;
     token_type: string;
     access_token: string;
     expires_in: number;
 };
 
-type RefreshResponseData = {
+export interface IRefreshResponseData {
     token_type: string;
     access_token: string;
     expires_in: number;
 };
 
-export type RefreshedToken = {
+export interface IRefreshedToken {
     token: string;
     expiration: number;
     [key: string]: any;

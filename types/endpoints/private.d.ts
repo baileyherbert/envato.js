@@ -1,8 +1,7 @@
 import { Client } from '../client';
-import { Sale, GetPurchasesOptions, GetStatementOptions, GetDownloadLinkOptions } from '../types/private';
-import { MarketDomain } from '../types/market';
-export declare class PrivateClientGroup {
-    private client;
+import { ListPurchasesOptions, StatementOptions, DownloadLinkOptions } from '../types/options';
+import { Sale, MarketDomain } from '../types/api';
+export declare class PrivateEndpoints {
     constructor(client: Client);
     /**
      * Lists all unrefunded sales of the authenticated user's items listed on Envato Market. Author sales data
@@ -10,7 +9,7 @@ export declare class PrivateClientGroup {
      *
      * @param page A page number to start the results from.
      */
-    getSales(page?: number): Promise<GetSalesResponse>;
+    getSales(page?: number): Promise<Sale[]>;
     /**
      * Returns the details of an author's sale identified by the purchase code. Author sales data ("Amount") is reported
      * before subtraction of any income taxes (eg US Royalty Withholding Tax). Returns `undefined` if no matching sale
@@ -18,20 +17,20 @@ export declare class PrivateClientGroup {
      *
      * @param code The unique code of the sale to return.
      */
-    getSale(code: string): Promise<GetSaleResponse | undefined>;
+    getSale(code: string): Promise<ISaleResponse | undefined>;
     /**
      * List purchases.
      *
      * @param code The unique code of the sale to return.
      */
-    getPurchases(options: GetPurchasesOptions): Promise<GetPurchasesResponse>;
+    getPurchases(options: ListPurchasesOptions): Promise<IPurchasesResponse>;
     /**
      * Lists all purchases that the authenticated user has made of the app creator's listed items. Only works
      * with OAuth tokens.
      *
      * @param page A page number to start the results from.
      */
-    getPurchasesFromAppCreator(page?: number): Promise<GetPurchasesFromAppCreatorResponse>;
+    getPurchasesFromAppCreator(page?: number): Promise<IPurchasesFromAppCreatorResponse>;
     /**
      * Returns the details of a user's purchase identified by the purchase code. Returns `undefined` if no matching
      * purchase is found.
@@ -39,12 +38,12 @@ export declare class PrivateClientGroup {
      * @param code The unique code of the purchase to return.
      * @deprecated The `purchase:history` permission is deprecated, please use `purchase:verify` instead.
      */
-    getPurchase(code: string): Promise<GetPurchaseResponse | undefined>;
+    getPurchase(code: string): Promise<IPurchaseResponse | undefined>;
     /**
      * Returns the first name, surname, earnings available to withdraw, total deposits, balance (deposits + earnings)
      * and country.
      */
-    getAccountDetails(): Promise<GetPrivateAccountDetailsResponse>;
+    getAccountDetails(): Promise<IPrivateAccountDetailsResponse>;
     /**
      * Returns the currently logged in user's Envato Account username.
      */
@@ -57,19 +56,18 @@ export declare class PrivateClientGroup {
      * Returns the monthly sales data, as displayed on the user's earnings page. Monthly sales data ("Earnings") is
      * reported before subtraction of any income taxes (eg US Royalty Withholding Tax).
      */
-    getMonthlySales(): Promise<GetMonthlySalesResponse>;
+    getMonthlySales(): Promise<IMonthlySalesResponse>;
     /**
      * Lists transactions from the user's statement page.
      */
-    getStatement(options: GetStatementOptions): Promise<GetStatementResponse>;
+    getStatement(options: StatementOptions): Promise<IStatementResponse>;
     /**
      * Download purchased items by either the item_id or the purchase_code. Each invocation of this endpoint will count
      * against the items daily download limit.
      */
-    getDownloadLink(options: GetDownloadLinkOptions): Promise<string>;
+    getDownloadLink(options: DownloadLinkOptions): Promise<string>;
 }
-export declare type GetSalesResponse = Sale[];
-export declare type GetSaleResponse = Sale & {
+export interface ISaleResponse extends Sale {
     /**
      * The username of the buyer. Note that this can be `null` if the item was purchased via guest checkout.
      */
@@ -78,14 +76,14 @@ export declare type GetSaleResponse = Sale & {
      * The number of times this buyer has purchased the item.
      */
     purchase_count: number;
-};
-export declare type GetPurchasesResponse = {
+}
+export interface IPurchasesResponse {
     count: number;
     results: (Sale & {
         code: string;
     })[];
-};
-export declare type GetPurchasesFromAppCreatorResponse = {
+}
+export interface IPurchasesFromAppCreatorResponse {
     buyer: {
         id: number;
         username: string;
@@ -97,11 +95,11 @@ export declare type GetPurchasesFromAppCreatorResponse = {
     purchases: (Sale & {
         code: string;
     })[];
-};
-export declare type GetPurchaseResponse = Sale & {
+}
+export interface IPurchaseResponse extends Sale {
     code: string;
-};
-export declare type GetPrivateAccountDetailsResponse = {
+}
+export interface IPrivateAccountDetailsResponse {
     image: string;
     firstname: string;
     surname: string;
@@ -109,14 +107,14 @@ export declare type GetPrivateAccountDetailsResponse = {
     total_deposits: string;
     balance: string;
     country: string;
-};
-export declare type GetUsernameResponse = {
+}
+export interface IUsernameResponse {
     username: string;
-};
-export declare type GetEmailResponse = {
+}
+export interface IEmailResponse {
     email: string;
-};
-export declare type GetMonthlySalesResponse = {
+}
+export interface IMonthlySalesResponse {
     /**
      * The month as a timestamp (format: `"Mon Apr 01 00:00:00 +1100 2013"`).
      */
@@ -129,8 +127,8 @@ export declare type GetMonthlySalesResponse = {
      * The total earnings from sales this month as a double in a string (e.g. `"652.45"`).
      */
     earnings: string;
-}[];
-export declare type GetStatementResponse = {
+}
+export interface IStatementResponse {
     count: number;
     results: {
         unique_id: string;
@@ -152,7 +150,7 @@ export declare type GetStatementResponse = {
         other_party_city?: string;
         other_party_zipcode?: string;
     }[];
-};
-export declare type GetDownloadLinkResponse = {
+}
+export interface IDownloadLinkResponse {
     download_url: string;
-};
+}

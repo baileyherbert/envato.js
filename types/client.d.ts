@@ -1,28 +1,28 @@
 /// <reference types="node" />
 import { AxiosResponse, AxiosRequestConfig } from 'axios';
-import { CatalogClientGroup } from './client/catalog';
-import { PrivateClientGroup } from './client/private';
-import { StatsClientGroup } from './client/stats';
-import { UserClientGroup } from './client/user';
-import { OAuth, RefreshedToken } from './oauth';
+import { CatalogEndpoints } from './endpoints/catalog';
+import { PrivateEndpoints } from './endpoints/private';
+import { StatsEndpoints } from './endpoints/stats';
+import { UserEndpoints } from './endpoints/user';
+import { OAuth, IRefreshedToken } from './oauth';
 import { EventEmitter } from 'events';
 export declare class Client extends EventEmitter {
     /**
      * A collection of endpoints for browsing the Envato Market catalog.
      */
-    readonly catalog: CatalogClientGroup;
+    readonly catalog: CatalogEndpoints;
     /**
      * A collection of endpoints for accessing private details about the current user.
      */
-    readonly private: PrivateClientGroup;
+    readonly private: PrivateEndpoints;
     /**
      * A collection of endpoints for accessing public details about users.
      */
-    readonly user: UserClientGroup;
+    readonly user: UserEndpoints;
     /**
      * A collection of endpoints for retrieving general statistics about the marketplaces.
      */
-    readonly stats: StatsClientGroup;
+    readonly stats: StatsEndpoints;
     /**
      * The client options.
      */
@@ -71,18 +71,22 @@ export declare class Client extends EventEmitter {
      */
     getIdentity(): Promise<IdentityResponse>;
     /**
+     * Returns the unique Envato Account ID for the current user.
+     */
+    getId(): Promise<number>;
+    /**
      * Sends a `GET` request to the given path on the API and returns the parsed response.
      *
      * @param path The path to query (such as `"/catalog/item"`).
      */
-    get<T = Object>(path: string): Promise<T>;
+    get<T = any>(path: string): Promise<T>;
     /**
      * Sends a `POST` request to the given path on the API and returns the parsed response.
      *
      * @param path The path to query (such as `"/catalog/item"`).
      * @param params The posted parameters to send with the request.
      */
-    post<T = Object>(path: string, params?: {
+    post<T = any>(path: string, params?: {
         [name: string]: any;
     }): Promise<T>;
     /**
@@ -91,7 +95,7 @@ export declare class Client extends EventEmitter {
      * @param path The path to query (such as `"/catalog/item"`).
      * @param params The posted parameters to send with the request.
      */
-    put<T = Object>(path: string, params?: {
+    put<T = any>(path: string, params?: {
         [name: string]: any;
     }): Promise<T>;
     /**
@@ -100,7 +104,7 @@ export declare class Client extends EventEmitter {
      * @param path The path to query (such as `"/catalog/item"`).
      * @param params The posted parameters to send with the request.
      */
-    patch<T = Object>(path: string, params?: {
+    patch<T = any>(path: string, params?: {
         [name: string]: any;
     }): Promise<T>;
     /**
@@ -109,12 +113,11 @@ export declare class Client extends EventEmitter {
      * @param path The path to query (such as `"/catalog/item"`).
      * @param params The posted parameters to send with the request.
      */
-    delete<T = Object>(path: string, params?: {
+    delete<T = any>(path: string, params?: {
         [name: string]: any;
     }): Promise<T>;
-    private _getRequestHeaders;
     on(event: 'debug', listener: (response: AxiosResponse<string>) => void): this;
-    on(event: 'renew', listener: (data: RefreshedToken) => void): this;
+    on(event: 'renew', listener: (data: IRefreshedToken) => void): this;
     on(event: 'ratelimit', listener: (duration: number) => void): this;
     on(event: 'resume', listener: () => void): this;
 }

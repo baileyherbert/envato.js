@@ -1,47 +1,45 @@
-import axios, { AxiosResponse, AxiosRequestConfig } from 'axios';
-import { stringify } from 'qs';
-
-import { CatalogClientGroup } from './client/catalog';
-import { PrivateClientGroup } from './client/private';
-import { StatsClientGroup } from './client/stats';
-import { UserClientGroup } from './client/user';
-import { OAuth, RefreshedToken } from './oauth';
+import { AxiosResponse, AxiosRequestConfig } from 'axios';
+import { CatalogEndpoints } from './endpoints/catalog';
+import { PrivateEndpoints } from './endpoints/private';
+import { StatsEndpoints } from './endpoints/stats';
+import { UserEndpoints } from './endpoints/user';
+import { OAuth, IRefreshedToken } from './oauth';
 import { EventEmitter } from 'events';
 import { Queue } from './util/queue';
-import * as Errors from './helpers/errors';
-import { Http, RequestMethod, FetchResponse } from './helpers/http';
+import { Http, RequestMethod } from './helpers/http';
+import { scope } from './util/mutate';
 
 export class Client extends EventEmitter {
 
     /**
      * A collection of endpoints for browsing the Envato Market catalog.
      */
-    public readonly catalog : CatalogClientGroup;
+    public readonly catalog: CatalogEndpoints;
 
     /**
      * A collection of endpoints for accessing private details about the current user.
      */
-    public readonly private: PrivateClientGroup;
+    public readonly private: PrivateEndpoints;
 
     /**
      * A collection of endpoints for accessing public details about users.
      */
-    public readonly user: UserClientGroup;
+    public readonly user: UserEndpoints;
 
     /**
      * A collection of endpoints for retrieving general statistics about the marketplaces.
      */
-    public readonly stats: StatsClientGroup;
+    public readonly stats: StatsEndpoints;
 
     /**
      * The client options.
      */
-    public options : ClientOptions;
+    public options: ClientOptions;
 
     /**
      * The queue for executing requests.
      */
-    private queue : Queue;
+    private queue: Queue;
 
     /**
      * Constructs a new `Client` instance.
@@ -61,10 +59,10 @@ export class Client extends EventEmitter {
 
         // Set properties
         this.options = tokenOrOptions;
-        this.catalog = new CatalogClientGroup(this);
-        this.private = new PrivateClientGroup(this);
-        this.stats = new StatsClientGroup(this);
-        this.user = new UserClientGroup(this);
+        this.catalog = new CatalogEndpoints(this);
+        this.private = new PrivateEndpoints(this);
+        this.stats = new StatsEndpoints(this);
+        this.user = new UserEndpoints(this);
         this.queue = new Queue(this);
 
         // Forward queue events
@@ -130,12 +128,19 @@ export class Client extends EventEmitter {
     }
 
     /**
+     * Returns the unique Envato Account ID for the current user.
+     */
+    public async getId() {
+        return scope('userId', await this.getIdentity());
+    }
+
+    /**
      * Sends a `GET` request to the given path on the API and returns the parsed response.
      *
      * @param path The path to query (such as `"/catalog/item"`).
      */
-    public get<T = Object>(path: string) : Promise<T> {
-        return this.fetch('GET', path);
+    public get<T = any>(path: string) : Promise<T> {
+        return this._fetch('GET', path);
     }
 
     /**
@@ -144,8 +149,8 @@ export class Client extends EventEmitter {
      * @param path The path to query (such as `"/catalog/item"`).
      * @param params The posted parameters to send with the request.
      */
-    public post<T = Object>(path: string, params?: { [name: string]: any }) : Promise<T> {
-        return this.fetch('POST', path, params);
+    public post<T = any>(path: string, params?: { [name: string]: any }) : Promise<T> {
+        return this._fetch('POST', path, params);
     }
 
     /**
@@ -154,8 +159,8 @@ export class Client extends EventEmitter {
      * @param path The path to query (such as `"/catalog/item"`).
      * @param params The posted parameters to send with the request.
      */
-    public put<T = Object>(path: string, params?: { [name: string]: any }) : Promise<T> {
-        return this.fetch('PUT', path, params);
+    public put<T = any>(path: string, params?: { [name: string]: any }) : Promise<T> {
+        return this._fetch('PUT', path, params);
     }
 
     /**
@@ -164,8 +169,8 @@ export class Client extends EventEmitter {
      * @param path The path to query (such as `"/catalog/item"`).
      * @param params The posted parameters to send with the request.
      */
-    public patch<T = Object>(path: string, params?: { [name: string]: any }) : Promise<T> {
-        return this.fetch('PATCH', path, params);
+    public patch<T = any>(path: string, params?: { [name: string]: any }) : Promise<T> {
+        return this._fetch('PATCH', path, params);
     }
 
     /**
@@ -174,18 +179,14 @@ export class Client extends EventEmitter {
      * @param path The path to query (such as `"/catalog/item"`).
      * @param params The posted parameters to send with the request.
      */
-    public delete<T = Object>(path: string, params?: { [name: string]: any }) : Promise<T> {
-        return this.fetch('DELETE', path, params);
+    public delete<T = any>(path: string, params?: { [name: string]: any }) : Promise<T> {
+        return this._fetch('DELETE', path, params);
     }
 
-    /**
-     * Fetches the path via the given method.
-     * @internal
-     */
-    protected fetch<T>(method: RequestMethod, path: string, form ?: { [name: string]: any }) : Promise<T> {
+    private _fetch<T>(method: RequestMethod, path: string, form ?: { [name: string]: any }) : Promise<T> {
         return this.queue.push<T>(async (resolve, reject, retry) => {
             if (this.expired && this.options.oauth && this.options.refreshToken) {
-                let refresh = await this.options.oauth.renew(this);
+                const refresh = await this.options.oauth.renew(this);
 
                 this.options.token = refresh.token;
                 this.options.expiration = refresh.expiration;
@@ -194,16 +195,16 @@ export class Client extends EventEmitter {
             }
 
             try {
-                let url = this._getRequestUrl(path);
-                let headers = this._getRequestHeaders();
-                let axios = this.options.axios;
-                let res = await Http.fetch<T>({ method, url, headers, form, axios });
+                const url = this._getFullRequestUrl(path);
+                const headers = this._getRequestHeaders();
+                const axios = this.options.axios;
+                const res = await Http.fetch<T>({ method, url, headers, form, axios });
 
                 this.emit('debug', res.response);
 
                 if ((this.options.concurrency || 1) > 0 && this.options.handleRateLimits && res.status === 429) {
-                    let retryAfterString = res.headers['retry-after'] || '0';
-                    let retryAfter = parseInt(retryAfterString) || 0;
+                    const retryAfterString = res.headers['retry-after'] || '0';
+                    const retryAfter = parseInt(retryAfterString) || 0;
 
                     // Reschedule the fetch in the queue
                     return retry(retryAfter);
@@ -230,16 +231,12 @@ export class Client extends EventEmitter {
         };
     }
 
-    /**
-     * Returns an absolute URL to the API with the given path.
-     * @internal
-     */
-    private _getRequestUrl(path: string) {
+    private _getFullRequestUrl(path: string) {
         return 'https://api.envato.com/' + path.replace(/^\/+/, '');
     }
 
     public on(event: 'debug', listener: (response: AxiosResponse<string>) => void): this;
-    public on(event: 'renew', listener: (data: RefreshedToken) => void): this;
+    public on(event: 'renew', listener: (data: IRefreshedToken) => void): this;
     public on(event: 'ratelimit', listener: (duration: number) => void): this;
     public on(event: 'resume', listener: () => void): this;
     public on(event: string, listener: (...args: any[]) => void) {
@@ -248,14 +245,13 @@ export class Client extends EventEmitter {
 }
 
 export interface ClientOptions {
-
     /**
      * The token to use for authorization. Acceptable values include:
      *
      * - Personal tokens.
      * - Access tokens (OAuth).
      */
-    token : string;
+    token: string;
 
     /**
      * The user agent string to send with requests. This should briefly explain what your app is or its purpose.
@@ -267,13 +263,13 @@ export interface ClientOptions {
      * - `"Support forum authentication & license verification"`
      * - `"Gathering data on items"`
      */
-    userAgent ?: string;
+    userAgent?: string;
 
     /**
      * For OAuth sessions, you may optionally provide the refresh token to enable automatic token renewal when the
      * current access token expires. You must also supply the `expiration` option when providing this option.
      */
-    refreshToken ?: string;
+    refreshToken?: string;
 
     /**
      * For OAuth sessions, you should provide a timestamp representing the time when the access token expires as a
@@ -282,18 +278,18 @@ export interface ClientOptions {
      *
      * **Note:** If you need to store newly generated access tokens, listen for the `renew` event on the client.
      */
-    expiration ?: Date | number;
+    expiration?: Date | number;
 
     /**
      * The OAuth helper instance to use for automatically refreshing access tokens. This instance must have the same
      * credentials as the instance that was used to authenticate the OAuth session.
      */
-    oauth ?: OAuth;
+    oauth?: OAuth;
 
     /**
      * Optional configuration for the underlying `axios` library.
      */
-    axios ?: AxiosRequestConfig;
+    axios?: AxiosRequestConfig;
 
     /**
      * If set to `true`, the client will automatically handle rate limits. Any blocked requests will be retried when
@@ -305,7 +301,7 @@ export interface ClientOptions {
      *
      * Defaults to `true`.
      */
-    handleRateLimits ?: boolean;
+    handleRateLimits?: boolean;
 
     /**
      * The maximum number of simultaneous requests this client can send to Envato. It is highly recommended to set a
@@ -315,15 +311,14 @@ export interface ClientOptions {
      *
      * Defaults to `3`.
      */
-    concurrency ?: number;
-
+    concurrency?: number;
 };
 
 export interface IdentityResponse {
     /**
      * The client ID of the application, if this is an OAuth session. Otherwise, this is `null`.
      */
-    clientId ?: string;
+    clientId?: string;
 
     /**
      * The unique ID of the user who is authorized by the current token.

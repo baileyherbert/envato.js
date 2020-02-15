@@ -1,7 +1,6 @@
-import { MarketName } from '../types/market';
 import { Client } from '../client';
-export declare class StatsClientGroup {
-    private client;
+import { MarketName } from '../types/api';
+export declare class StatsEndpoints {
     constructor(client: Client);
     /**
      * Shows the total number of subscribed users to Envato Market.
@@ -16,20 +15,10 @@ export declare class StatsClientGroup {
      *
      * @param site Site.
      */
-    getFilesPerCategory(site: MarketName): Promise<GetFilesPerCategoryResponse>;
+    getFilesPerCategory(site: MarketName): Promise<IFilesPerCategoryResponse>;
 }
-export declare type GetTotalUsersResponse = {
-    'total-users': {
-        total_users: string;
-    };
-};
-export declare type GetTotalItemsResponse = {
-    'total-items': {
-        total_items: string;
-    };
-};
-export declare type GetFilesPerCategoryResponse = {
+export interface IFilesPerCategoryResponse {
     category: string;
     number_of_files: string;
     url: string;
-}[];
+}

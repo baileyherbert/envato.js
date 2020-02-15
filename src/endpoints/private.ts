@@ -1,14 +1,18 @@
 import { Client } from '../client';
-import { Sale, GetPurchasesOptions, GetStatementOptions, GetDownloadLinkOptions } from '../types/private';
-import { MarketDomain } from '../types/market';
+import { ListPurchasesOptions, StatementOptions, DownloadLinkOptions } from '../types/options';
+import { Sale, MarketDomain } from '../types/api';
 
-import * as url from '../util/url';
-import * as mutate from '../util/mutate';
-import * as errors from '../util/errors';
+import url from '../util/url';
+import mutate from '../util/mutate';
+import errors from '../util/errors';
 
-export class PrivateClientGroup {
+export class PrivateEndpoints {
 
-    public constructor(private client: Client) {}
+    private _client: Client;
+
+    public constructor(client: Client) {
+        this._client = client;
+    }
 
     /**
      * Lists all unrefunded sales of the authenticated user's items listed on Envato Market. Author sales data
@@ -17,7 +21,7 @@ export class PrivateClientGroup {
      * @param page A page number to start the results from.
      */
     public getSales(page?: number) {
-        return this.client.get<GetSalesResponse>(url.build('/v3/market/author/sales', {
+        return this._client.get<Sale[]>(url.build('/v3/market/author/sales', {
             page
         }));
     }
@@ -30,7 +34,7 @@ export class PrivateClientGroup {
      * @param code The unique code of the sale to return.
      */
     public getSale(code: string) {
-        return errors.find(this.client.get<GetSaleResponse>(url.build('/v3/market/author/sale', {
+        return errors.find(this._client.get<ISaleResponse>(url.build('/v3/market/author/sale', {
             code
         })));
     }
@@ -40,8 +44,8 @@ export class PrivateClientGroup {
      *
      * @param code The unique code of the sale to return.
      */
-    public getPurchases(options: GetPurchasesOptions) {
-        return this.client.get<GetPurchasesResponse>(url.build('/v3/market/buyer/list-purchases', options));
+    public getPurchases(options: ListPurchasesOptions) {
+        return this._client.get<IPurchasesResponse>(url.build('/v3/market/buyer/list-purchases', options));
     }
 
     /**
@@ -51,7 +55,7 @@ export class PrivateClientGroup {
      * @param page A page number to start the results from.
      */
     public getPurchasesFromAppCreator(page ?: number) {
-        return this.client.get<GetPurchasesFromAppCreatorResponse>(url.build('/v3/market/buyer/purchases', {
+        return this._client.get<IPurchasesFromAppCreatorResponse>(url.build('/v3/market/buyer/purchases', {
             page
         }));
     }
@@ -64,7 +68,7 @@ export class PrivateClientGroup {
      * @deprecated The `purchase:history` permission is deprecated, please use `purchase:verify` instead.
      */
     public getPurchase(code: string) {
-        return errors.find(this.client.get<GetPurchaseResponse>(url.build('/v3/market/buyer/purchase', {
+        return errors.find(this._client.get<IPurchaseResponse>(url.build('/v3/market/buyer/purchase', {
             code
         })));
     }
@@ -73,10 +77,10 @@ export class PrivateClientGroup {
      * Returns the first name, surname, earnings available to withdraw, total deposits, balance (deposits + earnings)
      * and country.
      */
-    public async getAccountDetails() : Promise<GetPrivateAccountDetailsResponse> {
+    public async getAccountDetails() : Promise<IPrivateAccountDetailsResponse> {
         return mutate.scope(
             'account',
-            await this.client.get<any>(url.build('/v1/market/private/user/account.json'))
+            await this._client.get(url.build('/v1/market/private/user/account.json'))
         );
     }
 
@@ -86,7 +90,7 @@ export class PrivateClientGroup {
     public async getUsername(){
         return mutate.scope(
             'username',
-            await this.client.get<GetUsernameResponse>(url.build('/v1/market/private/user/username.json'))
+            await this._client.get<IUsernameResponse>(url.build('/v1/market/private/user/username.json'))
         );
     }
 
@@ -96,7 +100,7 @@ export class PrivateClientGroup {
     public async getEmail() {
         return mutate.scope(
             'email',
-            await this.client.get<GetEmailResponse>(url.build('/v1/market/private/user/email.json'))
+            await this._client.get<IEmailResponse>(url.build('/v1/market/private/user/email.json'))
         );
     }
 
@@ -104,36 +108,34 @@ export class PrivateClientGroup {
      * Returns the monthly sales data, as displayed on the user's earnings page. Monthly sales data ("Earnings") is
      * reported before subtraction of any income taxes (eg US Royalty Withholding Tax).
      */
-    public async getMonthlySales() : Promise<GetMonthlySalesResponse> {
+    public async getMonthlySales() : Promise<IMonthlySalesResponse> {
         return mutate.scope(
             'earnings-and-sales-by-month',
-            await this.client.get<any>(url.build('/v1/market/private/user/earnings-and-sales-by-month.json'))
+            await this._client.get(url.build('/v1/market/private/user/earnings-and-sales-by-month.json'))
         );
     }
 
     /**
      * Lists transactions from the user's statement page.
      */
-    public getStatement(options: GetStatementOptions) {
-        return this.client.get<GetStatementResponse>(url.build('/v3/market/user/statement', options));
+    public getStatement(options: StatementOptions) {
+        return this._client.get<IStatementResponse>(url.build('/v3/market/user/statement', options));
     }
 
     /**
      * Download purchased items by either the item_id or the purchase_code. Each invocation of this endpoint will count
      * against the items daily download limit.
      */
-    public async getDownloadLink(options: GetDownloadLinkOptions) {
+    public async getDownloadLink(options: DownloadLinkOptions) {
         return mutate.scope(
             'download_url',
-            await this.client.get<GetDownloadLinkResponse>(url.build('/v3/market/buyer/download', options))
+            await this._client.get<IDownloadLinkResponse>(url.build('/v3/market/buyer/download', options))
         );
     }
 
 }
 
-export type GetSalesResponse = Sale[];
-
-export type GetSaleResponse = Sale & {
+export interface ISaleResponse extends Sale {
     /**
      * The username of the buyer. Note that this can be `null` if the item was purchased via guest checkout.
      */
@@ -145,12 +147,12 @@ export type GetSaleResponse = Sale & {
     purchase_count: number;
 };
 
-export type GetPurchasesResponse = {
+export interface IPurchasesResponse {
     count: number;
     results: (Sale & { code: string })[];
 };
 
-export type GetPurchasesFromAppCreatorResponse = {
+export interface IPurchasesFromAppCreatorResponse {
     buyer: {
         id: number;
         username: string;
@@ -162,9 +164,11 @@ export type GetPurchasesFromAppCreatorResponse = {
     purchases: (Sale & { code: string })[];
 };
 
-export type GetPurchaseResponse = Sale & { code: string };
+export interface IPurchaseResponse extends Sale {
+    code: string;
+};
 
-export type GetPrivateAccountDetailsResponse = {
+export interface IPrivateAccountDetailsResponse {
     image: string;
     firstname: string;
     surname: string;
@@ -174,15 +178,15 @@ export type GetPrivateAccountDetailsResponse = {
     country: string;
 };
 
-export type GetUsernameResponse = {
+export interface IUsernameResponse {
     username: string;
 };
 
-export type GetEmailResponse = {
+export interface IEmailResponse {
     email: string;
 };
 
-export type GetMonthlySalesResponse = {
+export interface IMonthlySalesResponse {
     /**
      * The month as a timestamp (format: `"Mon Apr 01 00:00:00 +1100 2013"`).
      */
@@ -199,7 +203,7 @@ export type GetMonthlySalesResponse = {
     earnings: string;
 }[];
 
-export type GetStatementResponse = {
+export interface IStatementResponse {
     count: number;
     results: {
         unique_id: string;
@@ -223,6 +227,6 @@ export type GetStatementResponse = {
     }[];
 };
 
-export type GetDownloadLinkResponse = {
+export interface IDownloadLinkResponse {
     download_url: string;
 }

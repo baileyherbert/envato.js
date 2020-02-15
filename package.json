@@ -29,7 +29,7 @@
         "envato market"
     ],
     "dependencies": {
-        "@types/node": "^12.12.27",
+        "@types/node": "*",
         "axios": "^0.19.2",
         "qs": "^6.9.1"
     },

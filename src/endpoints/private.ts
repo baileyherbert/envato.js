@@ -34,7 +34,7 @@ export class PrivateEndpoints {
      * @param code The unique code of the sale to return.
      */
     public getSale(code: string) {
-        return errors.find(this._client.get<ISaleResponse>(url.build('/v3/market/author/sale', {
+        return errors.findPurchaseCode(this._client.get<ISaleResponse>(url.build('/v3/market/author/sale', {
             code
         })));
     }
@@ -68,7 +68,7 @@ export class PrivateEndpoints {
      * @deprecated The `purchase:history` permission is deprecated, please use `purchase:verify` instead.
      */
     public getPurchase(code: string) {
-        return errors.find(this._client.get<IPurchaseResponse>(url.build('/v3/market/buyer/purchase', {
+        return errors.findPurchaseCode(this._client.get<IPurchaseResponse>(url.build('/v3/market/buyer/purchase', {
             code
         })));
     }

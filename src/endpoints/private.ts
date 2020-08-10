@@ -33,8 +33,21 @@ export class PrivateEndpoints {
      *
      * @param code The unique code of the sale to return.
      */
-    public getSale(code: string) {
-        return errors.findPurchaseCode(this._client.get<ISaleResponse>(url.build('/v3/market/author/sale', {
+    public async getSale(code: string) {
+        // Make sure we've got a string
+        if (typeof code !== 'string') {
+            return;
+        }
+
+        // Lowercase and trim the code to prevent errors
+        code = code.toLowerCase().trim();
+
+        // Validate the code format
+        if (!/^([a-f0-9]{8})-(([a-f0-9]{4})-){3}([a-f0-9]{12})$/i.test(code)) {
+            return;
+        }
+
+        return await errors.findPurchaseCode(this._client.get<ISaleResponse>(url.build('/v3/market/author/sale', {
             code
         })));
     }
@@ -67,8 +80,21 @@ export class PrivateEndpoints {
      * @param code The unique code of the purchase to return.
      * @deprecated The `purchase:history` permission is deprecated, please use `purchase:verify` instead.
      */
-    public getPurchase(code: string) {
-        return errors.findPurchaseCode(this._client.get<IPurchaseResponse>(url.build('/v3/market/buyer/purchase', {
+    public async getPurchase(code: string) {
+        // Make sure we've got a string
+        if (typeof code !== 'string') {
+            return;
+        }
+
+        // Lowercase and trim the code to prevent errors
+        code = code.toLowerCase().trim();
+
+        // Validate the code format
+        if (!/^([a-f0-9]{8})-(([a-f0-9]{4})-){3}([a-f0-9]{12})$/i.test(code)) {
+            return;
+        }
+
+        return await errors.findPurchaseCode(this._client.get<IPurchaseResponse>(url.build('/v3/market/buyer/purchase', {
             code
         })));
     }

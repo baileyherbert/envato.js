@@ -2,7 +2,7 @@
 
 import { Client, ClientOptions, IdentityResponse } from './client';
 import { OAuth, OAuthOptions, IRefreshedToken } from './oauth';
-import { AccessDeniedError, BadRequestError, ErrorResponse, HttpError, NotFoundError, ServerError, TooManyRequestsError, UnauthorizedError } from './helpers/errors';
+import { AccessDeniedError, BadRequestError, ErrorResponse, HttpError, NotFoundError, ServerError, TooManyRequestsError, UnauthorizedError, OAuthError } from './helpers/errors';
 import { ICategoriesResponse, CatalogEndpoints, ICollectionResponse, IFeaturesResponse, IItemPricesResponse, IItemVersionResponse, IPopularItemsResponse, ISearchCommentsResponse, ISearchItemsResponse } from './endpoints/catalog';
 import { IDownloadLinkResponse, IEmailResponse, IMonthlySalesResponse, IPrivateAccountDetailsResponse, IPurchaseResponse, IPurchasesFromAppCreatorResponse, IPurchasesResponse, ISaleResponse, IStatementResponse, IUsernameResponse, PrivateEndpoints } from './endpoints/private';
 import { IFilesPerCategoryResponse, StatsEndpoints } from './endpoints/stats';
@@ -23,7 +23,7 @@ export {
     OAuth, OAuthOptions, IRefreshedToken,
 
     // helpers/errors
-    AccessDeniedError, BadRequestError, ErrorResponse, HttpError, NotFoundError, ServerError, TooManyRequestsError, UnauthorizedError,
+    AccessDeniedError, BadRequestError, ErrorResponse, HttpError, NotFoundError, ServerError, TooManyRequestsError, UnauthorizedError, OAuthError,
 
     // client/catalog
     ICategoriesResponse, CatalogEndpoints, ICollectionResponse, IFeaturesResponse, IItemPricesResponse, IItemVersionResponse, IPopularItemsResponse, ISearchCommentsResponse, ISearchItemsResponse,

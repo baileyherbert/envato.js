@@ -218,7 +218,7 @@ new Envato.Client({
 
 #### Request options
 
-This library uses [`request`](https://www.npmjs.com/package/request) under the hood for its HTTP requests. If you need to specify HTTP options, you can use the `request` option in the client. Check out the [request docs](https://www.npmjs.com/package/request#requestoptions-callback) for a list of available options.
+This library uses [`axios`](https://www.npmjs.com/package/axios) under the hood for its HTTP requests. If you need to specify HTTP options, you can use the `request` option in the client. Check out the [axios docs](https://www.npmjs.com/package/axios#request-config) for a list of available options.
 
 ```js
 new Envato.Client({
@@ -695,13 +695,16 @@ catch (error) {
         console.error('Message:', error.message);
         console.error('More details:', error.response);
     }
+    else if (error instanceof Envato.OAuthError) {
+        console.error('Failed to renew OAuth session.');
+    }
     else {
         console.error('Got an error from request.');
     }
 }
 ```
 
-As shown in the code above, requests can throw two different categories of errors. The first is an instance of `Envato.HttpError`, which will contain a message such as "Unauthorized" or "Bad Request". It will also usually provide a `response` object which will look something like below, though under rare circumstances this object may be `undefined`:
+As shown in the code above, requests can throw 3 different types of errors. The first is an instance of `Envato.HttpError`, which will contain a message such as "Unauthorized" or "Bad Request". It will also usually provide a `response` object which will look something like below, though under rare circumstances this object may be `undefined`:
 
 ```json
 {
@@ -710,7 +713,9 @@ As shown in the code above, requests can throw two different categories of error
 }
 ```
 
-The second type of error is a generic `Error` instance which is most likely to originate from the underlying `request` library and will ultimately be caused by a connection error, parsing error, or timeout. You will also receive a generic `Error` instance if you send a request through an expired OAuth token and it fails to automatically renew the token.
+The second type of error is an `Envato.OAuthError`, which only applies to OAuth-based clients, and will be thrown when renewal of the OAuth session fails (which might happen if the user revokes your application's access to their account, or if there's an API outage). This error will contain an `http` property that will expose the underlying `Envato.HttpError` if applicable.
+
+The third type of error is a generic `Error` instance which is most likely to originate from the underlying `axios` library and will ultimately be caused by a connection error, parsing error, or timeout.
 
 ### Error codes
 

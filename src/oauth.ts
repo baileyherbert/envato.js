@@ -2,6 +2,7 @@ import { Client } from './client';
 import { AxiosRequestConfig } from 'axios';
 import { Http, RequestForm, FetchResponse } from './helpers/http';
 import url from './util/url';
+import { OAuthError } from './helpers/errors';
 
 /**
  * Helper class for OAuth applications. Includes methods to both authorize new clients and renew tokens.
@@ -41,11 +42,11 @@ export class OAuth {
         });
 
         if (statusError) {
-            throw statusError;
+            throw new OAuthError('Received an HTTP error', statusError);
         }
 
         if (!body.token_type) {
-            throw new Error('Unexpected response from API when renewing token: \n' + response.data);
+            throw new OAuthError('Unexpected response from API when renewing token: \n' + response.data.toString());
         }
 
         return new Client({

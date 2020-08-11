@@ -69,6 +69,15 @@ export class ServerError extends HttpError {
         this.name = 'ServerError';
     }
 }
+/**
+ * Thrown when an error occurs while generating a token from OAuth.
+ */
+export class OAuthError extends Error {
+    public constructor(message: string, public readonly http?: HttpError) {
+        super(message);
+        this.name = 'OAuthError';
+    }
+}
 
 /**
  * An optional object with more details on an HTTP error. These aren't always available.

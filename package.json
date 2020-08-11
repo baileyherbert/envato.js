@@ -1,6 +1,6 @@
 {
     "name": "envato",
-    "version": "2.4.1",
+    "version": "2.4.2",
     "description": "Library for the Envato API, with support for both personal tokens and OAuth.",
     "main": "dist/index.js",
     "types": "types/index.d.ts",
@@ -35,7 +35,7 @@
     },
     "devDependencies": {
         "@types/mocha": "^5.2.7",
-        "@types/qs": "^6.9.1",
+        "@types/qs": "^6.9.4",
         "del": "^5.1.0",
         "gulp": "^4.0.2",
         "gulp-typescript": "^6.0.0-alpha.1",

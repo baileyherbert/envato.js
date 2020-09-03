@@ -6,4 +6,4 @@ node_js:
   - "9"
   - "13"
 before_script:
-  - npm run build
+  - yarn build

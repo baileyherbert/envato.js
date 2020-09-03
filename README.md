@@ -714,7 +714,7 @@ As shown in the code above, requests can throw 3 different types of errors. The 
 
 The second type of error is an `Envato.OAuthError`, which only applies to OAuth-based clients, and will be thrown when renewal of the OAuth session fails (which might happen if the user revokes your application's access to their account, or if there's an API outage). This error will contain an `http` property that will expose the underlying `Envato.HttpError` if applicable.
 
-The third type of error is a generic `Error` instance which is most likely to originate from the underlying `axios` library and will ultimately be caused by a connection error, parsing error, or timeout.
+The third type of error is an `Envato.FetchError` due to a connection error or timeout.
 
 ### Error codes
 

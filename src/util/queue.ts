@@ -1,4 +1,4 @@
-import { Client } from '../client';
+import { Client } from '../clients/client';
 import { EventEmitter } from 'events';
 
 export class Queue extends EventEmitter {

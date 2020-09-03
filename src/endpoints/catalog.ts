@@ -1,4 +1,4 @@
-import { Client } from '../client';
+import { Client } from '../clients/client';
 import { ItemSearchOptions, CommentSearchOptions } from '../types/options';
 import { MarketName, Collection, Item, ItemComment, ItemShort, ItemMedium } from '../types/api';
 

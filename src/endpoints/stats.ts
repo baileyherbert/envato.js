@@ -1,4 +1,4 @@
-import { Client } from '../client';
+import { Client } from '../clients/client';
 import { MarketName } from '../types/api';
 
 import url from '../util/url';

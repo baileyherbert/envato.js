@@ -1,4 +1,4 @@
-import { Client } from '../client';
+import { Client } from '../clients/client';
 import { ListPurchasesOptions, StatementOptions, DownloadLinkOptions } from '../types/options';
 import { Sale, MarketDomain } from '../types/api';
 

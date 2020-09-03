@@ -1,7 +1,7 @@
 import { Client } from './client';
-import { HttpClient, RequestForm, EnvatoHttpResponse, EnvatoHttpOptions } from './helpers/http';
-import { OAuthError } from './helpers/errors';
-import url from './util/url';
+import { HttpClient, RequestForm, EnvatoHttpResponse, EnvatoHttpOptions } from '../helpers/http';
+import { OAuthError } from '../helpers/errors';
+import url from '../util/url';
 
 /**
  * Helper class for OAuth applications. Includes methods to both authorize new clients and renew tokens.

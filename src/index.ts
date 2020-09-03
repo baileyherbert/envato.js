@@ -1,5 +1,5 @@
-export * from './client';
-export * from './oauth';
+export * from './clients/client';
+export * from './clients/oauth';
 
 export * from './endpoints/catalog';
 export * from './endpoints/private';

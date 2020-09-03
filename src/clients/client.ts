@@ -1,12 +1,12 @@
-import { CatalogEndpoints } from './endpoints/catalog';
-import { PrivateEndpoints } from './endpoints/private';
-import { StatsEndpoints } from './endpoints/stats';
-import { UserEndpoints } from './endpoints/user';
+import { CatalogEndpoints } from '../endpoints/catalog';
+import { PrivateEndpoints } from '../endpoints/private';
+import { StatsEndpoints } from '../endpoints/stats';
+import { UserEndpoints } from '../endpoints/user';
 import { OAuth, IRefreshedToken } from './oauth';
 import { EventEmitter } from 'events';
-import { Queue } from './util/queue';
-import { HttpClient, EnvatoHttpOptions, RequestMethod, RequestOptions, RequestForm, RequestHeaders, EnvatoHttpResponse } from './helpers/http';
-import { scope } from './util/mutate';
+import { Queue } from '../util/queue';
+import { HttpClient, EnvatoHttpOptions, RequestMethod, RequestOptions, RequestForm, RequestHeaders, EnvatoHttpResponse } from '../helpers/http';
+import { scope } from '../util/mutate';
 import { Response as FetchResponse } from 'node-fetch';
 
 export class Client extends EventEmitter {

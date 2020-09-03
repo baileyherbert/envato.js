@@ -1,7 +1,7 @@
 import { Headers, RequestInit, Response } from 'node-fetch';
 import { HttpError, BadRequestError, UnauthorizedError, AccessDeniedError, NotFoundError, TooManyRequestsError, ServerError } from './errors';
 import * as FormData from 'form-data';
-import { Client } from '../client';
+import { Client } from '../clients/client';
 import { AbortSignal } from 'node-fetch/externals';
 import fetch from 'node-fetch';
 

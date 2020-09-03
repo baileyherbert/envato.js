@@ -1,4 +1,4 @@
-const { Client, NotFoundError, UnauthorizedError } = require('../dist');
+const { Client, NotFoundError, UnauthorizedError, FetchError } = require('../dist');
 const assert = require('assert');
 
 const { CatalogEndpoints } = require('../dist/endpoints/catalog');
@@ -72,6 +72,19 @@ describe('personal client', () => {
         }
         catch (error) {
             assert(error instanceof NotFoundError);
+        }
+    });
+
+    it('throws fetch error on timeout', async() => {
+        try {
+            await client.get('/v3/not-found', {
+                timeout: 1
+            });
+
+            assert.fail('The request did not throw a timeout error');
+        }
+        catch (error) {
+            assert(error instanceof FetchError);
         }
     });
 

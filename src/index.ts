@@ -10,3 +10,5 @@ export * from './types/api';
 export * from './types/options';
 
 export * from './helpers/errors';
+
+export { FetchError } from 'node-fetch';

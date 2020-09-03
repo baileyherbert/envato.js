@@ -1,4 +1,3 @@
-import { AxiosResponse, AxiosRequestConfig } from 'axios';
 import { CatalogEndpoints } from './endpoints/catalog';
 import { PrivateEndpoints } from './endpoints/private';
 import { StatsEndpoints } from './endpoints/stats';
@@ -6,8 +5,9 @@ import { UserEndpoints } from './endpoints/user';
 import { OAuth, IRefreshedToken } from './oauth';
 import { EventEmitter } from 'events';
 import { Queue } from './util/queue';
-import { Http, RequestMethod } from './helpers/http';
+import { HttpClient, EnvatoHttpOptions, RequestMethod, RequestOptions, RequestForm, RequestHeaders, EnvatoHttpResponse } from './helpers/http';
 import { scope } from './util/mutate';
+import { Response as FetchResponse } from 'node-fetch';
 
 export class Client extends EventEmitter {
 
@@ -39,7 +39,12 @@ export class Client extends EventEmitter {
     /**
      * The queue for executing requests.
      */
-    private queue: Queue;
+    private _queue: Queue;
+
+    /**
+     * The HTTP client for sending requests.
+     */
+    private _httpClient: HttpClient;
 
     /**
      * Constructs a new `Client` instance.
@@ -63,11 +68,12 @@ export class Client extends EventEmitter {
         this.private = new PrivateEndpoints(this);
         this.stats = new StatsEndpoints(this);
         this.user = new UserEndpoints(this);
-        this.queue = new Queue(this);
+        this._queue = new Queue(this);
+        this._httpClient = new HttpClient(this);
 
         // Forward queue events
-        this.queue.on('ratelimit', duration => this.emit('ratelimit', duration));
-        this.queue.on('resume', () => this.emit('resume'));
+        this._queue.on('ratelimit', duration => this.emit('ratelimit', duration));
+        this._queue.on('resume', () => this.emit('resume'));
     }
 
     /**
@@ -138,9 +144,10 @@ export class Client extends EventEmitter {
      * Sends a `GET` request to the given path on the API and returns the parsed response.
      *
      * @param path The path to query (such as `"/catalog/item"`).
+     * @param options Fetch options to use for this request.
      */
-    public get<T = any>(path: string) : Promise<T> {
-        return this._fetch('GET', path);
+    public get<T = any>(path: string, options?: RequestOptions) : Promise<T> {
+        return this._fetch('GET', path, undefined, options);
     }
 
     /**
@@ -148,9 +155,10 @@ export class Client extends EventEmitter {
      *
      * @param path The path to query (such as `"/catalog/item"`).
      * @param params The posted parameters to send with the request.
+     * @param options Fetch options to use for this request.
      */
-    public post<T = any>(path: string, params?: { [name: string]: any }) : Promise<T> {
-        return this._fetch('POST', path, params);
+    public post<T = any>(path: string, params?: RequestForm, options?: RequestOptions) : Promise<T> {
+        return this._fetch('POST', path, params, options);
     }
 
     /**
@@ -158,9 +166,10 @@ export class Client extends EventEmitter {
      *
      * @param path The path to query (such as `"/catalog/item"`).
      * @param params The posted parameters to send with the request.
+     * @param options Fetch options to use for this request.
      */
-    public put<T = any>(path: string, params?: { [name: string]: any }) : Promise<T> {
-        return this._fetch('PUT', path, params);
+    public put<T = any>(path: string, params?: RequestForm, options?: RequestOptions) : Promise<T> {
+        return this._fetch('PUT', path, params, options);
     }
 
     /**
@@ -168,9 +177,10 @@ export class Client extends EventEmitter {
      *
      * @param path The path to query (such as `"/catalog/item"`).
      * @param params The posted parameters to send with the request.
+     * @param options Fetch options to use for this request.
      */
-    public patch<T = any>(path: string, params?: { [name: string]: any }) : Promise<T> {
-        return this._fetch('PATCH', path, params);
+    public patch<T = any>(path: string, params?: RequestForm, options?: RequestOptions) : Promise<T> {
+        return this._fetch('PATCH', path, params, options);
     }
 
     /**
@@ -178,13 +188,22 @@ export class Client extends EventEmitter {
      *
      * @param path The path to query (such as `"/catalog/item"`).
      * @param params The posted parameters to send with the request.
+     * @param options Fetch options to use for this request.
      */
-    public delete<T = any>(path: string, params?: { [name: string]: any }) : Promise<T> {
-        return this._fetch('DELETE', path, params);
+    public delete<T = any>(path: string, params?: RequestForm, options?: RequestOptions) : Promise<T> {
+        return this._fetch('DELETE', path, params, options);
     }
 
-    private _fetch<T>(method: RequestMethod, path: string, form ?: { [name: string]: any }) : Promise<T> {
-        return this.queue.push<T>(async (resolve, reject, retry) => {
+    /**
+     * Performs an HTTP request to the API.
+     *
+     * @param method
+     * @param path
+     * @param form
+     * @param options
+     */
+    private _fetch<T>(method: RequestMethod, path: string, form?: RequestForm, options?: RequestOptions) : Promise<T> {
+        return this._queue.push<T>(async (resolve, reject, retry) => {
             if (this.expired && this.options.oauth && this.options.refreshToken) {
                 const refresh = await this.options.oauth.renew(this);
 
@@ -197,10 +216,10 @@ export class Client extends EventEmitter {
             try {
                 const url = this._getFullRequestUrl(path);
                 const headers = this._getRequestHeaders();
-                const axios = this.options.axios;
-                const res = await Http.fetch<T>({ method, url, headers, form, axios });
+                const http = this.options.http;
+                const res = await this._httpClient.fetch<T>({ headers, url, form, method, options });
 
-                this.emit('debug', res.response);
+                this.emit('debug', res);
 
                 if ((this.options.concurrency || 1) > 0 && this.options.handleRateLimits && res.status === 429) {
                     const retryAfterString = res.headers['retry-after'] || '0';
@@ -211,8 +230,8 @@ export class Client extends EventEmitter {
                 }
 
                 // If the status code isn't 200, then statusError will have an HttpError instance that we can throw
-                if (res.statusError) {
-                    return reject(res.statusError);
+                if (res.error) {
+                    return reject(res.error);
                 }
 
                 // At this point, we should have everything squared away
@@ -224,18 +243,23 @@ export class Client extends EventEmitter {
         });
     }
 
-    private _getRequestHeaders() {
-        return {
-            'Authorization': 'Bearer ' + this.options.token,
-            'User-Agent': this.options.userAgent
+    private _getRequestHeaders(): RequestHeaders {
+        const headers = {
+            authorization: 'Bearer ' + this.options.token
         };
+
+        if (this.options.userAgent) {
+            headers['user-agent'] = this.options.userAgent;
+        }
+
+        return headers;
     }
 
     private _getFullRequestUrl(path: string) {
         return 'https://api.envato.com/' + path.replace(/^\/+/, '');
     }
 
-    public on(event: 'debug', listener: (response: AxiosResponse<string>) => void): this;
+    public on(event: 'debug', listener: (response: EnvatoHttpResponse<any>) => void): this;
     public on(event: 'renew', listener: (data: IRefreshedToken) => void): this;
     public on(event: 'ratelimit', listener: (duration: number) => void): this;
     public on(event: 'resume', listener: () => void): this;
@@ -287,9 +311,9 @@ export interface ClientOptions {
     oauth?: OAuth;
 
     /**
-     * Optional configuration for the underlying `axios` library.
+     * Optional configuration for outgoing HTTP requests.
      */
-    axios?: AxiosRequestConfig;
+    http?: EnvatoHttpOptions;
 
     /**
      * If set to `true`, the client will automatically handle rate limits. Any blocked requests will be retried when

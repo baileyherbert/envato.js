@@ -1,8 +1,7 @@
 import { Client } from './client';
-import { AxiosRequestConfig } from 'axios';
-import { Http, RequestForm, FetchResponse } from './helpers/http';
-import url from './util/url';
+import { HttpClient, RequestForm, EnvatoHttpResponse, EnvatoHttpOptions } from './helpers/http';
 import { OAuthError } from './helpers/errors';
+import url from './util/url';
 
 /**
  * Helper class for OAuth applications. Includes methods to both authorize new clients and renew tokens.
@@ -10,9 +9,11 @@ import { OAuthError } from './helpers/errors';
 export class OAuth {
 
     private _options: OAuthOptions;
+    private _httpClient: HttpClient;
 
     public constructor(options: OAuthOptions) {
         this._options = options;
+        this._httpClient = new HttpClient();
     }
 
     /**
@@ -34,19 +35,19 @@ export class OAuth {
      * @param code The single-use authentication code returned from the Envato authorization screen.
      */
     public async getClient(code: string) : Promise<Client> {
-        const { body, statusError, response } = await this._sendRequest<IResponseData>({
+        const { body, error } = await this._sendRequest<IResponseData>({
             grant_type: 'authorization_code',
             client_id: this._options.client_id,
             client_secret: this._options.client_secret,
             code
         });
 
-        if (statusError) {
-            throw new OAuthError('Received an HTTP error', statusError);
+        if (error) {
+            throw new OAuthError('Received an HTTP error', error);
         }
 
         if (!body.token_type) {
-            throw new OAuthError('Unexpected response from API when renewing token: \n' + response.data.toString());
+            throw new OAuthError('Unexpected response from API when renewing token');
         }
 
         return new Client({
@@ -64,19 +65,19 @@ export class OAuth {
      * @param client The client whose access token needs to be renewed.
      */
     public async renew(client: Client) : Promise<IRefreshedToken> {
-        const { response, body, statusError } = await this._sendRequest<IRefreshResponseData>({
+        const { error, body } = await this._sendRequest<IRefreshResponseData>({
             grant_type: 'refresh_token',
             client_id: this._options.client_id,
             client_secret: this._options.client_secret,
             refresh_token: client.refreshToken
         });
 
-        if (statusError) {
-            throw statusError;
+        if (error) {
+            throw new OAuthError('Received HTTP error during token renewal', error);
         }
 
         if (!body.token_type) {
-            throw new Error('Unexpected response from API when renewing token: \n' + response.data);
+            throw new OAuthError('Unexpected response from API when renewing token');
         }
 
         return {
@@ -86,12 +87,23 @@ export class OAuth {
         };
     }
 
-    private async _sendRequest<T>(form: RequestForm) : Promise<FetchResponse<T>> {
+    /**
+     * Performs an OAuth request.
+     *
+     * @param form
+     */
+    private async _sendRequest<T>(form: RequestForm) : Promise<EnvatoHttpResponse<T>> {
         const url = 'https://api.envato.com/token';
-        const headers = { 'User-Agent': this._options.userAgent };
-        const axios = this._options.axios;
+        const headers = {};
+        const options = this._options.http;
 
-        return await Http.fetch<T>({ url, headers, axios, form });
+        // Add the user-agent header if available
+        if (this._options.userAgent) {
+            headers['user-agent'] = this._options.userAgent;
+        }
+
+        // Send the request
+        return await this._httpClient.fetch<T>({ url, headers, options, form });
     }
 
 }
@@ -128,7 +140,7 @@ export interface OAuthOptions {
     /**
      * Optional configuration for the underlying `axios` library.
      */
-    axios?: AxiosRequestConfig;
+    http?: EnvatoHttpOptions;
 };
 
 export interface IResponseData {

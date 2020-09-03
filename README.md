@@ -218,15 +218,14 @@ new Envato.Client({
 
 #### Request options
 
-This library uses [`axios`](https://www.npmjs.com/package/axios) under the hood for its HTTP requests. If you need to specify HTTP options, you can use the `request` option in the client. Check out the [axios docs](https://www.npmjs.com/package/axios#request-config) for a list of available options.
+This library uses [`node-fetch`](https://www.npmjs.com/package/node-fetch) under the hood for its HTTP requests. You can use the `http` option to customize the default timeout and compression settings.
 
 ```js
 new Envato.Client({
     token: 'personal token',
-    request: {
-        gzip: false,
-        timeout: 10000,
-        strictSSL: false
+    http: {
+        timeout: 30000,
+        compression: false
     }
 })
 ```
@@ -753,11 +752,17 @@ client.on('renew', function(data) {
 
 ### Debug
 
-This event is triggered once for each request, and is sent the raw arguments from the underlying `request` library. You can use this to debug problems and see what's going on under the hood, and for logging purposes.
+This event is triggered once for each request. You can use this to debug problems and see what's going on under the hood, and to log things such as status codes or response times.
 
 ```js
-client.on('debug', function(err, response, body) {
-    console.log('Debug:', err, response, body);
+client.on('debug', function(response) {
+    console.log(
+        '[Request] Got %d response back from %s (took %d ms):',
+        response.status,
+        response.request.url,
+        response.took,
+        response.body
+    );
 });
 ```
 

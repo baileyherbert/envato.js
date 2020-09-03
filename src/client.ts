@@ -126,6 +126,14 @@ export class Client extends EventEmitter {
     }
 
     /**
+     * Whether or not the client is currently rate limited and deferring requests. You can also use the `ratelimit`
+     * and `resume` client events to track changes to this value.
+     */
+    public get rateLimited() {
+        return this._queue.isDeferring();
+    }
+
+    /**
      * Returns the identity of the current token, which includes the account id, a list of all granted permissions, and
      * the number of seconds until the token expires.
      */

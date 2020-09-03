@@ -221,13 +221,13 @@ export interface EnvatoHttpOptions {
 	 * The default timeout for requests in milliseconds, or `0` to disable.
 	 * @default 0
 	 */
-	timeout: number;
+	timeout?: number;
 
 	/**
 	 * Whether or not to support gzip/deflate content encoding for requests.
 	 * @default true
 	 */
-	compress: boolean;
+	compress?: boolean;
 }
 
 export type RequestMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS';

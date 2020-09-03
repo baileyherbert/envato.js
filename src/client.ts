@@ -274,6 +274,15 @@ export class Client extends EventEmitter {
     public on(event: string, listener: (...args: any[]) => void) {
         return super.on(event, listener);
     }
+
+    public once(event: 'debug', listener: (response: EnvatoHttpResponse<any>) => void): this;
+    public once(event: 'renew', listener: (data: IRefreshedToken) => void): this;
+    public once(event: 'ratelimit', listener: (duration: number) => void): this;
+    public once(event: 'resume', listener: () => void): this;
+    public once(event: string, listener: (...args: any[]) => void) {
+        return super.once(event, listener);
+    }
+
 }
 
 export interface ClientOptions {

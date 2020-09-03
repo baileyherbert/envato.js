@@ -20,7 +20,6 @@ This is a library for working with the new Envato API.
 - Supports both OAuth and personal tokens.
 - Handles rate limits and concurrency for you.
 - Full type hinting and autocompletion in modern editors.
-- Works in the browser with Webpack or Browserify.
 
 Envato.js extracts the relevant data from responses and returns them without any extra bloat. It also converts data
 where possible, such as converting timestamps into `Date` objects.

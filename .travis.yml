@@ -5,5 +5,7 @@ branches:
 node_js:
   - "9"
   - "13"
+install:
+  - yarn --ignore-engines
 before_script:
   - yarn build

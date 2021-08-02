@@ -134,7 +134,7 @@ export class PrivateEndpoints {
      * Returns the monthly sales data, as displayed on the user's earnings page. Monthly sales data ("Earnings") is
      * reported before subtraction of any income taxes (eg US Royalty Withholding Tax).
      */
-    public async getMonthlySales() : Promise<IMonthlySalesResponse> {
+    public async getMonthlySales() : Promise<IMonthlySalesResponse[]> {
         return mutate.scope(
             'earnings-and-sales-by-month',
             await this._client.get(url.build('/v1/market/private/user/earnings-and-sales-by-month.json'))

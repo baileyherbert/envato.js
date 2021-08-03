@@ -7,7 +7,6 @@ import { EventEmitter } from 'events';
 import { Queue } from '../util/queue';
 import { HttpClient, EnvatoHttpOptions, RequestMethod, RequestOptions, RequestForm, RequestHeaders, EnvatoHttpResponse } from '../helpers/http';
 import { scope } from '../util/mutate';
-import { Response as FetchResponse } from 'node-fetch';
 
 export class Client extends EventEmitter {
 
@@ -267,17 +266,75 @@ export class Client extends EventEmitter {
         return 'https://api.envato.com/' + path.replace(/^\/+/, '');
     }
 
+    /**
+     * The `debug` event is invoked whenever an HTTP request completes. The response object is passed.
+     *
+     * @param event
+     * @param listener
+     */
     public on(event: 'debug', listener: (response: EnvatoHttpResponse<any>) => void): this;
+
+    /**
+     * The `renew` event is invoked when the client's access token expires and it automatically renews. An object
+     * containing the new access token and expiration timestamp is passed for storage. This only applies to OAuth
+     * clients.
+     *
+     * @param event
+     * @param listener
+     */
     public on(event: 'renew', listener: (data: IRefreshedToken) => void): this;
+
+    /**
+     * The `ratelimit` event is invoked whenever the client becomes rate limited. The duration of the rate limit in
+     * milliseconds is passed. The client will automatically pause and queue all requests until the rate limit expires.
+     *
+     * @param event
+     * @param listener
+     */
     public on(event: 'ratelimit', listener: (duration: number) => void): this;
+
+    /**
+     * The `resume` event is invoked when a rate limit ends.
+     * @param event
+     * @param listener
+     */
     public on(event: 'resume', listener: () => void): this;
     public on(event: string, listener: (...args: any[]) => void) {
         return super.on(event, listener);
     }
 
+    /**
+     * The `debug` event is invoked whenever an HTTP request completes. The response object is passed.
+     *
+     * @param event
+     * @param listener
+     */
     public once(event: 'debug', listener: (response: EnvatoHttpResponse<any>) => void): this;
+
+    /**
+     * The `renew` event is invoked when the client's access token expires and it automatically renews. An object
+     * containing the new access token and expiration timestamp is passed for storage. This only applies to OAuth
+     * clients.
+     *
+     * @param event
+     * @param listener
+     */
     public once(event: 'renew', listener: (data: IRefreshedToken) => void): this;
+
+    /**
+     * The `ratelimit` event is invoked whenever the client becomes rate limited. The duration of the rate limit in
+     * milliseconds is passed. The client will automatically pause and queue all requests until the rate limit expires.
+     *
+     * @param event
+     * @param listener
+     */
     public once(event: 'ratelimit', listener: (duration: number) => void): this;
+
+    /**
+     * The `resume` event is invoked when a rate limit ends.
+     * @param event
+     * @param listener
+     */
     public once(event: 'resume', listener: () => void): this;
     public once(event: string, listener: (...args: any[]) => void) {
         return super.once(event, listener);

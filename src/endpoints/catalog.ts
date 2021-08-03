@@ -209,15 +209,15 @@ export interface IPopularItemsResponse {
     }[];
 };
 
-export interface ICategoriesResponse {
+export interface ICategoriesResponse extends Array<{
     name: string;
     path: string;
-}[];
+}> {};
 
-export interface IItemPricesResponse {
+export interface IItemPricesResponse extends Array<{
     license: string;
     price: string;
-}[];
+}> {};
 
 export interface IFeaturesResponse {
     featured_file: ItemMedium;

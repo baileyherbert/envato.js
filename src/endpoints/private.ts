@@ -212,7 +212,7 @@ export interface IEmailResponse {
     email: string;
 };
 
-export interface IMonthlySalesResponse {
+export interface IMonthlySalesResponse extends Array<{
     /**
      * The month as a timestamp (format: `"Mon Apr 01 00:00:00 +1100 2013"`).
      */
@@ -227,7 +227,7 @@ export interface IMonthlySalesResponse {
      * The total earnings from sales this month as a double in a string (e.g. `"652.45"`).
      */
     earnings: string;
-}[];
+}> {};
 
 export interface IStatementResponse {
     count: number;

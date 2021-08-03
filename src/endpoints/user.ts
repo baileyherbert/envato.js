@@ -129,7 +129,7 @@ export interface IAccountDetailsResponse {
     followers: string;
 };
 
-export interface IBadgesResponse {
+export interface IBadgesResponse extends Array<{
     /**
      * A unique identifier for the badge, typically in a format like `"author_level_6"`.
      */
@@ -144,9 +144,9 @@ export interface IBadgesResponse {
      * An absolute URL to the badge's image (in SVG format).
      */
     image: string;
-}[];
+}> {};
 
-export interface IItemsBySiteResponse {
+export interface IItemsBySiteResponse extends Array<{
     /**
      * The name of the marketplace (e.g. `"CodeCanyon"`).
      */
@@ -156,4 +156,4 @@ export interface IItemsBySiteResponse {
      * The number of items as a plain, unformatted number within a string.
      */
     items: string;
-}[];
+}> {};

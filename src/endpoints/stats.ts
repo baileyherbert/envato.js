@@ -46,8 +46,8 @@ export class StatsEndpoints {
 
 }
 
-export interface IFilesPerCategoryResponse {
+export interface IFilesPerCategoryResponse extends Array<{
     category: string;
     number_of_files: string;
     url: string;
-}[];
+}> {};

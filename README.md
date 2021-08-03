@@ -180,13 +180,15 @@ In the future, if you need to reconstruct a client instance from these parameter
 const oauth = new Envato.OAuth(...);
 
 // To construct a client without automatic renewal, simply pass the token
-let client = new Envato.Client(database.load('token'));
+// Once the token expires, the client will stop working
+let client = new Envato.Client(fakeStorage.get('token'));
 
 // To construct a client with automatic renewal, pass all properties and an OAuth instance
+// Once the token expires, it will be automatically renewed
 let client = new Envato.Client({
-    token: database.load('token'),
-    refreshToken: database.load('refreshToken'),
-    expiration: database.load('expiration'),
+    token: fakeStorage.get('accessToken'),
+    refreshToken: fakeStorage.get('refreshToken'),
+    expiration: fakeStorage.get('expiration'),
     oauth
 });
 ```
@@ -195,8 +197,8 @@ Additionally, you will likely want to keep track of the new access token and exp
 
 ```js
 client.on('renew', renewal => {
-    console.log('Got a new access token:', renewal.access_token);
-    console.log('The new token expires at:', renewal.expiration);
+    fakeStorage.set('accessToken', renewal.accessToken);
+    fakeStorage.set('expiration', renewal.expiration);
 });
 ```
 

@@ -83,6 +83,7 @@ export class OAuth {
         return {
             token: body.access_token,
             access_token: body.access_token,
+            accessToken: body.access_token,
             expiration: (new Date()).getTime() + (body.expires_in * 1000) - 1000
         };
     }
@@ -158,14 +159,14 @@ export interface IRefreshResponseData {
 
 export interface IRefreshedToken {
     /**
-     * Alias for `access_token`, here only for backwards compatibility!
+     * Alias for `accessToken`, here only for backwards compatibility!
      */
     token: string;
 
     /**
-     * The new `access_token`. This should be stored in the database alongside the old `refresh_token`.
+     * The new access token. This should be stored in the database alongside the existing refresh token.
      */
-    access_token: string;
+    accessToken: string;
 
     /**
      * The timestamp at which the new access token will expire (epoch milliseconds).

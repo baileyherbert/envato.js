@@ -157,7 +157,20 @@ export interface IRefreshResponseData {
 };
 
 export interface IRefreshedToken {
+    /**
+     * Alias for `access_token`, here only for backwards compatibility!
+     */
     token: string;
+
+    /**
+     * The new `access_token`. This should be stored in the database alongside the old `refresh_token`.
+     */
+    access_token: string;
+
+    /**
+     * The timestamp at which the new access token will expire (epoch milliseconds).
+     */
     expiration: number;
+
     [key: string]: any;
 };

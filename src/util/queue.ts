@@ -54,7 +54,7 @@ export class Queue extends EventEmitter {
      * Returns a promise which resolves immediately after a rate limiting event.
      */
     public defer() {
-        return new Promise(resolve => {
+        return new Promise<void>(resolve => {
             const current = this.getTime();
             const remaining = this.retryTime - current;
 

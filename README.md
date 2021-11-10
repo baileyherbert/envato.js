@@ -97,11 +97,11 @@ npm install envato
 const Envato = require('envato');
 
 async function start() {
-    let client = new Envato.Client('personal token here');
+    const client = new Envato.Client('personal token here');
 
-    let { userId } = await client.getIdentity();
-    let username = await client.private.getUsername();
-    let email = await client.private.getEmail();
+    const { userId } = await client.getIdentity();
+    const username = await client.private.getUsername();
+    const email = await client.private.getEmail();
 
     console.log('Logged in:', userId, username, email);
 }
@@ -147,12 +147,16 @@ Once the user returns from a successful authentication, the current URL should c
 ```js
 // This is an example express route to handle the request
 app.get('/authenticate', async function(req, res) {
-    let code = req.query.code;
-
     try {
+        // Fetch the code from the URL
+        const code = req.query.code;
+
         // Authenticate the user via the API
-    	let client = await oauth.getClient(code);
-        let username = await client.private.getUsername();
+    	const client = await oauth.getClient(code);
+        const username = await client.private.getUsername();
+
+        // You can also get their User ID for data storage
+        const { userId } = await client.getIdentity();
 
         res.send(`Hello, ${username}!`);
     }
@@ -166,7 +170,7 @@ app.get('/authenticate', async function(req, res) {
 Once you have your `client` instance, you can extract the access and refresh tokens, as well as the expiration time, and store them in a database for future use.
 
 ```js
-let { token, refreshToken, expiration } = client;
+const { token, refreshToken, expiration } = client;
 
 console.log('The current access token is %s', token);
 console.log('It expires at %d', expiration);
@@ -179,18 +183,18 @@ In the future, if you need to reconstruct a client instance from these parameter
 // It must have the same credentials as the instance that originally authenticated the user
 const oauth = new Envato.OAuth(...);
 
-// To construct a client without automatic renewal, simply pass the token
-// Once the token expires, the client will stop working
-let client = new Envato.Client(fakeStorage.get('token'));
-
 // To construct a client with automatic renewal, pass all properties and an OAuth instance
 // Once the token expires, it will be automatically renewed
-let client = new Envato.Client({
+const client = new Envato.Client({
     token: fakeStorage.get('accessToken'),
     refreshToken: fakeStorage.get('refreshToken'),
     expiration: fakeStorage.get('expiration'),
     oauth
 });
+
+// To construct a client WITHOUT automatic renewal, simply pass the token
+// Once the token expires, the client will stop working
+const client = new Envato.Client(fakeStorage.get('token'));
 ```
 
 Additionally, you will likely want to keep track of the new access token and expiration times whenever the client regenerates it. To do this, listen to the `renew` event on the client instance.
@@ -263,7 +267,7 @@ The code samples in this documentation use the `await` operator for simplicity a
 ```js
 // With await operator (recommended)
 try {
-    let username = await client.private.getUsername();
+    const username = await client.private.getUsername();
     console.log(`Hello, ${username}!`);
 }
 catch (error) {
@@ -283,7 +287,7 @@ client.private.getUsername().then(function(username) {
 You may wish to retrieve a unique ID for the user's account under which you can store data in your own database. Or, you may need to check the permissions on a personal token. You can check both of these through the `getIdentity` method.
 
 ```js
-let { userId, scopes } = await client.getIdentity();
+const { userId, scopes } = await client.getIdentity();
 
 console.log('Id:', userId);
 console.log('Scopes:', scopes);
@@ -306,8 +310,8 @@ The client exposes several different methods for sending requests (one for each 
 In the example below, we send a `POST` request to `/v3/path/to/endpoint` with the `params` object as our encoded form body. The return value is a parsed object.
 
 ```js
-let params = { name: 'hello world', id: 24596 };
-let response = await client.post('/v3/path/to/endpoint', params);
+const params = { name: 'hello world', id: 24596 };
+const response = await client.post('/v3/path/to/endpoint', params);
 ```
 
 For TypeScript users, it is possible to use generics to specify the format of the return value:
@@ -319,9 +323,9 @@ interface Response {
     private: boolean;
 };
 
-let response = await client.get<Response>('/v3/endpoint');
-let id = response.id; // Hinted as a number
-let private = response.private; // Hinted as a boolean
+const response = await client.get<Response>('/v3/endpoint');
+const id = response.id; // Hinted as a number
+const private = response.private; // Hinted as a boolean
 ```
 
 ### Catalog
@@ -331,10 +335,10 @@ let private = response.private; // Hinted as a boolean
 Returns details of, and items contained within, a public collection. Returns `undefined` if the collection is not found.
 
 ```js
-let response = await client.catalog.getCollection(25043);
+const response = await client.catalog.getCollection(25043);
 
-let name = response.collection.name;
-let items = response.items;
+const name = response.collection.name;
+const items = response.items;
 ```
 
 #### Look up a single item
@@ -342,11 +346,11 @@ let items = response.items;
 Returns all details of a particular item on Envato Market. Returns `undefined` if the item is not found.
 
 ```js
-let item = await client.catalog.getItem(123456);
+const item = await client.catalog.getItem(123456);
 
-let itemId = item.id;
-let itemName = item.name;
-let itemAuthor = item.author_username;
+const itemId = item.id;
+const itemName = item.name;
+const itemAuthor = item.author_username;
 ```
 
 #### Look up a WordPress theme or plugin's version
@@ -354,10 +358,10 @@ let itemAuthor = item.author_username;
 Returns the latest available version of a theme/plugin. This is the recommended endpoint for WordPress theme/plugin authors building an auto-upgrade system into their item that needs to check if a new version is available. Returns `undefined` if the theme or plugin is not found.
 
 ```js
-let version = await client.catalog.getItemVersion(123456);
+const version = await client.catalog.getItemVersion(123456);
 
-let themeVersion = version.wordpress_theme_latest_version;
-let pluginVersion = version.wordpress_plugin_latest_version;
+const themeVersion = version.wordpress_theme_latest_version;
+const pluginVersion = version.wordpress_plugin_latest_version;
 ```
 
 #### Search for items
@@ -365,7 +369,7 @@ let pluginVersion = version.wordpress_plugin_latest_version;
 Searches the marketplaces for items, with the same engine as the search on the market sites. Pass an object containing parameters as seen on the [API docs](https://build.envato.com/api#search_GET_search_item_json).
 
 ```js
-let response = await client.catalog.searchItems({
+const response = await client.catalog.searchItems({
     term: 'seo',
     site: 'codecanyon.net',
     page_size: 100,
@@ -375,7 +379,7 @@ let response = await client.catalog.searchItems({
 console.log('Search took %d milliseconds', response.took);
 console.log('Found %d items', response.matches.length);
 
-for (let item of response.matches) {
+for (const item of response.matches) {
     console.log('Item %d: %s', item.id, item.name);
 }
 ```
@@ -385,7 +389,7 @@ for (let item of response.matches) {
 Searches for comments on a specific item.
 
 ```js
-let response = await client.catalog.searchComments({
+const response = await client.catalog.searchComments({
     item_id: 123456,
     sort_by: 'newest',
     page_size: 100,
@@ -401,11 +405,11 @@ console.log('Found %d comments', response.matches.length);
 Returns the popular files for a particular site.
 
 ```js
-let popular = await client.catalog.getPopularItems();
+const popular = await client.catalog.getPopularItems();
 
-let lastWeek = popular.items_last_week;
-let lastThreeMonths = popular.items_last_three_months;
-let authorsLastMonth = popular.authors_last_month;
+const lastWeek = popular.items_last_week;
+const lastThreeMonths = popular.items_last_three_months;
+const authorsLastMonth = popular.authors_last_month;
 ```
 
 #### Get categories by site
@@ -413,9 +417,9 @@ let authorsLastMonth = popular.authors_last_month;
 Lists the categories of a particular site.
 
 ```js
-let categories = await client.catalog.getCategories('codecanyon');
+const categories = await client.catalog.getCategories('codecanyon');
 
-for (let category of categories) {
+for (const category of categories) {
     console.log('%s (%s)', category.name, category.path);
 }
 ```
@@ -425,9 +429,9 @@ for (let category of categories) {
 Return available licenses and prices for the given item ID. Throws an error if the item is not found.
 
 ```js
-let prices = await client.catalog.getItemPrices(123456);
+const prices = await client.catalog.getItemPrices(123456);
 
-for (let entry of prices) {
+for (const entry of prices) {
     console.log('%s ($%s)', entry.license, entry.price);
 }
 ```
@@ -442,9 +446,9 @@ Extended License ($125.00)
 New files, recently uploaded to a particular site.
 
 ```js
-let items = await client.catalog.getNewFiles('codecanyon', 'php-scripts');
+const items = await client.catalog.getNewFiles('codecanyon', 'php-scripts');
 
-for (let item of items) {
+for (const item of items) {
     console.log(item.id, item.name);
 }
 ```
@@ -454,11 +458,11 @@ for (let item of items) {
 Shows the current site features.
 
 ```js
-let features = await client.catalog.getFeatures('codecanyon');
+const features = await client.catalog.getFeatures('codecanyon');
 
-let featuredMonthlyFile = features.featured_file;
-let featuredAuthor = features.featured_author;
-let freeMonthlyFile = features.free_file;
+const featuredMonthlyFile = features.featured_file;
+const featuredAuthor = features.featured_author;
+const freeMonthlyFile = features.free_file;
 ```
 
 #### Get random new items
@@ -466,9 +470,9 @@ let freeMonthlyFile = features.free_file;
 Shows a random list of newly uploaded files from a particular site (i.e. like the homepage). This doesn't actually appear to be random at this time, but rather sorted by newest first. Could change in future since the endpoint is officially documented to return random results.
 
 ```js
-let items = await client.catalog.getRandomNewFiles('codecanyon');
+const items = await client.catalog.getRandomNewFiles('codecanyon');
 
-for (let item of items) {
+for (const item of items) {
     console.log(item.id, item.name);
 }
 ```
@@ -480,9 +484,9 @@ for (let item of items) {
 Lists all of the user's private and public collections.
 
 ```js
-let collections = await client.user.getCollections();
+const collections = await client.user.getCollections();
 
-for (let collection of collections) {
+for (const collection of collections) {
     console.log(collection.id, collection.name);
 }
 ```
@@ -493,11 +497,11 @@ Returns details and items for public or the user's private collections. Returns 
 found.
 
 ```js
-let { collection, items } = await client.user.getPrivateCollection(123456);
+const { collection, items } = await client.user.getPrivateCollection(123456);
 
 console.log('Collection:', collection.id, collection.name);
 
-for (let item of items) {
+for (const item of items) {
     console.log('Item:', item.id, item.name);
 }
 ```
@@ -507,7 +511,7 @@ for (let item of items) {
 Shows username, country, number of sales, number of followers, location and image for a user.
 
 ```js
-let user = await client.user.getAccountDetails('baileyherbert');
+const user = await client.user.getAccountDetails('baileyherbert');
 
 console.log('Username:', user.username);
 console.log('Sales:', user.sales);
@@ -519,9 +523,9 @@ console.log('Avatar URL:', user.image);
 Shows a list of badges for the given user.
 
 ```js
-let badges = await client.user.getBadges('baileyherbert');
+const badges = await client.user.getBadges('baileyherbert');
 
-for (let badge of badges) {
+for (const badge of badges) {
     console.log('Badge:', badge.name, badge.label, badge.image);
 }
 ```
@@ -531,9 +535,9 @@ for (let badge of badges) {
 Show the number of items an author has for sale on each site.
 
 ```js
-let counts = await client.user.getItemsBySite('baileyherbert');
+const counts = await client.user.getItemsBySite('baileyherbert');
 
-for (let count of counts) {
+for (const count of counts) {
     console.log('The user has %d items on %s', count.items, count.site);
 }
 ```
@@ -543,9 +547,9 @@ for (let count of counts) {
 Shows up to 1000 newest files uploaded by a user to a particular site.
 
 ```js
-let items = await client.user.getNewItems('baileyherbert', 'codecanyon');
+const items = await client.user.getNewItems('baileyherbert', 'codecanyon');
 
-for (let item of items) {
+for (const item of items) {
     console.log(item.id, item.name);
 }
 ```
@@ -557,9 +561,9 @@ for (let item of items) {
 Lists all unrefunded sales of the authenticated user's items listed on Envato Market. Author sales data ("Amount") is reported before subtraction of any income taxes (eg US Royalty Withholding Tax).
 
 ```js
-let sales = await client.private.getSales();
+const sales = await client.private.getSales();
 
-for (let sale of sales) {
+for (const sale of sales) {
     console.log('Sold %s for $%s', sale.item.name, sale.amount);
 }
 ```
@@ -570,7 +574,7 @@ Returns the details of an author's sale identified by the purchase code. Author 
 Returns `undefined` if the sale is not found.
 
 ```js
-let sale = await client.private.getSale('purchase-code');
+const sale = await client.private.getSale('purchase-code');
 
 console.log('Buyer:', sale.buyer);
 console.log('Item:', sale.item.id, sale.item.name);
@@ -581,7 +585,7 @@ console.log('Item:', sale.item.id, sale.item.name);
 List purchases that the user has made on their account.
 
 ```js
-let purchases = await client.private.getPurchases();
+const purchases = await client.private.getPurchases();
 ```
 
 #### List a buyer's purchases
@@ -589,9 +593,9 @@ let purchases = await client.private.getPurchases();
 Lists all purchases that the authenticated user has made of the app creator's listed items. Only works with OAuth tokens.
 
 ```js
-let { purchases } = await client.private.getPurchasesFromAppCreator();
+const { purchases } = await client.private.getPurchasesFromAppCreator();
 
-for (let purchase of purchases) {
+for (const purchase of purchases) {
     console.log('Bought %s (purchase code: %s)', purchase.item.name, purchase.code);
 }
 ```
@@ -602,7 +606,7 @@ Returns the details of a user's purchase identified by the purchase code. Return
 found.
 
 ```js
-let purchase = await client.private.getPurchase('purchase-code');
+const purchase = await client.private.getPurchase('purchase-code');
 ```
 
 #### Get a user's account details
@@ -610,7 +614,7 @@ let purchase = await client.private.getPurchase('purchase-code');
 Returns the first name, surname, earnings available to withdraw, total deposits, balance (deposits + earnings) and country.
 
 ```js
-let account = await client.private.getAccountDetails();
+const account = await client.private.getAccountDetails();
 ```
 
 #### Get a user's username
@@ -618,7 +622,7 @@ let account = await client.private.getAccountDetails();
 Returns the currently logged in user's Envato Account username as a string.
 
 ```js
-let username = await client.private.getUsername();
+const username = await client.private.getUsername();
 ```
 
 #### Get a user's email
@@ -626,7 +630,7 @@ let username = await client.private.getUsername();
 Returns the currently logged in user's email address as a string.
 
 ```js
-let email = await client.private.getEmail();
+const email = await client.private.getEmail();
 ```
 
 #### Get an author's monthly sales
@@ -634,7 +638,7 @@ let email = await client.private.getEmail();
 Returns the monthly sales data, as displayed on the user's earnings page. Monthly sales data ("Earnings") is reported before subtraction of any income taxes (eg US Royalty Withholding Tax).
 
 ```js
-let sales = await client.private.getMonthlySales();
+const sales = await client.private.getMonthlySales();
 ```
 
 #### Get statement data
@@ -642,7 +646,7 @@ let sales = await client.private.getMonthlySales();
 Lists transactions from the user's statement page.
 
 ```js
-let response = await client.private.getStatement();
+const response = await client.private.getStatement();
 ```
 
 #### Download a purchase
@@ -650,7 +654,7 @@ let response = await client.private.getStatement();
 Download purchased items by either the item_id or the purchase_code. Each invocation of this endpoint will count against the items daily download limit. Returns a string containing the one-time download link.
 
 ```js
-let url = await client.private.getDownloadLink({
+const url = await client.private.getDownloadLink({
     item_id: 123456
 });
 ```
@@ -662,7 +666,7 @@ let url = await client.private.getDownloadLink({
 Returns the total number of subscribed users to Envato Market.
 
 ```js
-let users = await client.stats.getTotalUsers();
+const users = await client.stats.getTotalUsers();
 ```
 
 #### Get the total number of market items
@@ -670,7 +674,7 @@ let users = await client.stats.getTotalUsers();
 Returns the total number of items available on Envato Market.
 
 ```js
-let items = await client.stats.getTotalItems();
+const items = await client.stats.getTotalItems();
 ```
 
 #### Get the number of items per category
@@ -678,7 +682,7 @@ let items = await client.stats.getTotalItems();
 Returns the total number of items available on Envato Market.
 
 ```js
-let categories = await client.stats.getFilesPerCategory();
+const categories = await client.stats.getFilesPerCategory();
 ```
 
 ## Error handling
@@ -687,7 +691,7 @@ When sending a request, you should always be prepared to handle errors in the ca
 
 ```js
 try {
-    let email = await client.private.getEmail();
+    const email = await client.private.getEmail();
 }
 catch (error) {
     if (error instanceof Envato.HttpError) {
@@ -746,8 +750,11 @@ This event is triggered whenever the client generates a new access token due to 
 
 ```js
 client.on('renew', function(data) {
-    let newAccessToken = data.token;
-    let expiration = data.expiration;
+    const newAccessToken = data.token;
+    const expiration = data.expiration;
+
+    // Store the new data somewhere...
+    // Note: The refresh token never changes
 });
 ```
 
@@ -786,3 +793,32 @@ client.on('resume', function() {
     console.log('Rate limit has ended.');
 });
 ```
+
+## Sandboxing
+
+The client has a `sandbox` option which allows you to use my unofficial public sandbox. Currently, only a few endpoints are supported:
+
+- Looking up a sale by purchase code
+- Listing all purchases of the app creator's items
+- Get the user's email address
+- Get the user's username
+
+To use it, simply set the option to true:
+
+```ts
+new Envato.Client({
+    token: 'your personal token',
+    sandbox: true
+});
+```
+
+You can also specify a base URL to use for a custom sandbox.
+
+```ts
+new Envato.Client({
+    token: 'your personal token',
+    sandbox: 'http://localhost:8080/'
+});
+```
+
+> 💡 **Note:** When sandbox mode is enabled, the client will automatically remove your personal token and user agent from the request, and a warning will be printed to the console for each request telling you that sandboxing is active.

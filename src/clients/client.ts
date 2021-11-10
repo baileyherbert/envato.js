@@ -221,6 +221,11 @@ export class Client extends EventEmitter {
             }
 
             try {
+                console.warn(
+                    '<!> Warning: Your Envato API client is in sandbox mode! Your personal token and user ' +
+                    'agent have been redacted automatically.'
+                );
+
                 const url = this._getFullRequestUrl(path);
                 const headers = this._getRequestHeaders();
                 const http = this.options.http;
@@ -251,6 +256,10 @@ export class Client extends EventEmitter {
     }
 
     private _getRequestHeaders(): RequestHeaders {
+        if (this.options.sandbox === true || typeof this.options.sandbox === 'string') {
+            return {};
+        }
+
         const headers = {
             authorization: 'Bearer ' + this.options.token
         };
@@ -263,7 +272,18 @@ export class Client extends EventEmitter {
     }
 
     private _getFullRequestUrl(path: string) {
-        return 'https://api.envato.com/' + path.replace(/^\/+/, '');
+        let baseUri = 'https://api.envato.com/';
+
+        if (this.options.sandbox !== undefined) {
+            if (this.options.sandbox === true) {
+                baseUri = 'https://sandbox.bailey.sh/';
+            }
+            else if (typeof this.options.sandbox === 'string') {
+                baseUri = this.options.sandbox.replace(/\/+$/, '') + '/';
+            }
+        }
+
+        return baseUri + path.replace(/^\/+/, '');
     }
 
     /**
@@ -410,6 +430,15 @@ export interface ClientOptions {
      * Defaults to `3`.
      */
     concurrency?: number;
+
+    /**
+     * Use an unofficial sandbox for testing? When `true`, a public sandbox from the author of the `envato` package
+     * will be used. You can also specify the base URI for a custom sandbox.
+     *
+     * Note: When sandboxing is enabled, your personal token and user agent is automatically removed from all requests
+     * and a warning that sandbox mode is active will be printed to stdout.
+     */
+    sandbox?: boolean | string;
 };
 
 export interface IdentityResponse {

@@ -221,15 +221,24 @@ export class Client extends EventEmitter {
             }
 
             try {
-                console.warn(
-                    '<!> Warning: Your Envato API client is in sandbox mode! Your personal token and user ' +
-                    'agent have been redacted automatically.'
-                );
+                if (this.options.sandbox === true || typeof this.options.sandbox === 'string') {
+                    console.warn(
+                        '<!> Warning: Your Envato API client is in sandbox mode! Your personal token and user ' +
+                        'agent have been redacted automatically.'
+                    );
+                }
 
                 const url = this._getFullRequestUrl(path);
                 const headers = this._getRequestHeaders();
-                const http = this.options.http;
-                const res = await this._httpClient.fetch<T>({ headers, url, form, method, options });
+                const http = this.options.http ?? {};
+
+                const res = await this._httpClient.fetch<T>({
+                    options: Object.assign({}, options, http),
+                    headers,
+                    url,
+                    form,
+                    method
+                });
 
                 this.emit('debug', res);
 

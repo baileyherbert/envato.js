@@ -82,6 +82,7 @@ where possible, such as converting timestamps into `Date` objects.
   - [Debug](#debug)
   - [Ratelimit](#ratelimit)
   - [Resume](#resume)
+- [Sandboxing](#sandboxing)
 
 ---
 

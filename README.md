@@ -813,6 +813,12 @@ new Envato.Client({
 });
 ```
 
+You can test by looking up a sale for the following purchase code:
+
+```
+86781236-23d0-4b3c-7dfa-c1c147e0dece
+```
+
 You can also specify a base URL to use for a custom sandbox.
 
 ```ts

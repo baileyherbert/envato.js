@@ -196,7 +196,7 @@ export interface CommentSearchOptions {
     /**
      * The item id to search for comments on.
      */
-    item_id: string;
+    item_id: string | number; // TODO: Remove string in v4
 
     /**
      * The search phrase to find.

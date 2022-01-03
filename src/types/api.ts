@@ -162,7 +162,7 @@ export interface ItemAttribute {
  * An individual comment in a conversation.
  */
 export interface ItemComment {
-    id: string;
+    id: number;
     username: string;
     content: string;
     created_at: Date;

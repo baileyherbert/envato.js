@@ -250,7 +250,7 @@ export interface StatementOptions {
     /**
      * Filter to a particular Envato Market site.
      */
-    site ?: string;
+    site ?: MarketDomain;
 };
 
 // #endregion

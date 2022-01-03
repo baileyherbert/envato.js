@@ -9,7 +9,7 @@
         "dist/**/*"
     ],
     "scripts": {
-		"build": "rimraf dist && tsc",
+        "build": "rimraf dist && tsc",
         "test": "mocha --timeout 30000"
     },
     "repository": "github:baileyherbert/envato.js",

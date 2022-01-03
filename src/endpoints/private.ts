@@ -165,7 +165,7 @@ export interface ISaleResponse extends Sale {
     /**
      * The username of the buyer. Note that this can be `null` if the item was purchased via guest checkout.
      */
-    buyer ?: string;
+    buyer: string | null;
 
     /**
      * The number of times this buyer has purchased the item.
@@ -234,22 +234,22 @@ export interface IStatementResponse {
     results: {
         unique_id: string;
         date: Date;
-        order_id ?: number;
+        order_id: number | null;
         type: string;
         detail: string;
-        item_id ?: number;
-        document ?: string;
-        price ?: number;
-        au_gst ?: number;
-        eu_vat ?: number;
-        us_rwt ?: number;
-        us_bwt ?: number;
+        item_id: number | null;
+        document: string | null;
+        price: number | null;
+        au_gst: number | null;
+        eu_vat: number | null;
+        us_rwt: number | null;
+        us_bwt: number | null;
         amount: number;
-        site ?: MarketDomain;
-        other_party_country ?: string;
-        other_party_region ?: string;
-        other_party_city ?: string;
-        other_party_zipcode ?: string;
+        site: MarketDomain | null;
+        other_party_country: string | null;
+        other_party_region: string | null;
+        other_party_city: string | null;
+        other_party_zipcode: string | null;
     }[];
 };
 

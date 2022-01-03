@@ -110,7 +110,8 @@ export interface Item {
         icon_with_audio_preview ?: {
             icon_url: string;
             mp3_url: string;
-            mp3_preview_download_url ?: string;
+            mp3_preview_waveform_url: string | null;
+            mp3_preview_download_url: string | null;
             mp3_id: string;
             length: {
                 hours: number;
@@ -142,7 +143,7 @@ export interface Item {
  * An image resource used in items.
  */
 export interface ItemImage {
-    name ?: string;
+    name: string | null;
     url: string;
     width: number;
     height: number;
@@ -153,8 +154,8 @@ export interface ItemImage {
  */
 export interface ItemAttribute {
     name: string;
-    value: string | string[];
-    label: string;
+    value: string | string[] | null;
+    label?: string;
 };
 
 /**
@@ -168,7 +169,7 @@ export interface ItemComment {
     author_comment: boolean;
     hidden_by_complaint: boolean;
     complaint_state: 'no_complaint' | 'ignored' | 'ignored_with_edit' | 'pending' | 'upheld';
-    profile_image_url: string;
+    profile_image_url: string | null;
 };
 
 /**

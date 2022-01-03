@@ -169,14 +169,14 @@ export interface IItemVersionResponse {
 export interface ISearchItemsResponse {
     took: number;
     matches: Item[];
-    item ?: Item;
+    item: Item | null;
     timed_out: boolean;
     total_hits: number;
     links: {
-        next_page_url ?: string;
-        prev_page_url ?: string;
-        first_page_url ?: string;
-        last_page_url ?: string;
+        next_page_url: string | null;
+        prev_page_url: string | null;
+        first_page_url: string;
+        last_page_url: string;
     },
     author_exists: boolean;
     aggregations: {
@@ -191,10 +191,10 @@ export interface ISearchCommentsResponse {
     timed_out: boolean;
     total_hits: number;
     links: {
-        next_page_url ?: string;
-        prev_page_url ?: string;
-        first_page_url ?: string;
-        last_page_url ?: string;
+        next_page_url: string | null;
+        prev_page_url: string | null;
+        first_page_url: string;
+        last_page_url: string;
     },
 };
 

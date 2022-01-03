@@ -1,6 +1,6 @@
 {
     "name": "envato",
-    "version": "3.0.4",
+    "version": "dev",
     "description": "A fully typed library for the Envato API (unofficial).",
     "license": "MIT",
     "main": "dist/index.js",
@@ -9,7 +9,7 @@
         "dist/**/*"
     ],
     "scripts": {
-        "build": "tsc",
+		"build": "rimraf dist && tsc",
         "test": "mocha --timeout 30000"
     },
     "repository": "github:baileyherbert/envato.js",
@@ -29,6 +29,7 @@
     "devDependencies": {
         "@types/mocha": "^5.2.7",
         "mocha": "^9.1.3",
+        "rimraf": "^3.0.2",
         "typescript": "^4.3.5"
     }
 }

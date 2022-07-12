@@ -104,7 +104,7 @@ export class OAuth {
         }
 
         // Send the request
-        return await this._httpClient.fetch<T>({ url, headers, options, form });
+        return await this._httpClient.fetch<T>({ url, headers, options, form, method: 'POST' });
     }
 
 }

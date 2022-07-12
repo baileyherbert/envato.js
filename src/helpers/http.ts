@@ -1,6 +1,5 @@
 import { Headers, RequestInit, Response } from 'node-fetch';
 import { HttpError, BadRequestError, UnauthorizedError, AccessDeniedError, NotFoundError, TooManyRequestsError, ServerError } from './errors';
-import * as FormData from 'form-data';
 import { Client } from '../clients/client';
 import { AbortSignal } from 'node-fetch/externals';
 import fetch from 'node-fetch';
@@ -63,14 +62,14 @@ export class HttpClient {
 		};
 
 		if (opts.form) {
-			const form = new FormData();
+			const form = new URLSearchParams();
 
 			for (const key in opts.form) {
 				form.append(key, opts.form[key]);
 			}
 
 			init.body = form;
-			init.headers!['content-type'] = 'x-www-form-urlencoded';
+			init.headers!['content-type'] = 'application/x-www-form-urlencoded';
 		}
 
 		return init;

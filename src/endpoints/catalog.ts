@@ -1,6 +1,6 @@
 import { Client } from '../clients/client';
 import { ItemSearchOptions, CommentSearchOptions } from '../types/options';
-import { MarketName, Collection, Item, ItemConversation, ItemShort, ItemMedium } from '../types/api';
+import { MarketName, Collection, Item, ItemConversation, ItemShort, ItemMedium, SearchItem } from '../types/api';
 
 import url from '../util/url';
 import mutate from '../util/mutate';
@@ -168,7 +168,7 @@ export interface IItemVersionResponse {
 
 export interface ISearchItemsResponse {
     took: number;
-    matches: Item[];
+    matches: SearchItem[];
     item: Item | null;
     timed_out: boolean;
     total_hits: number;

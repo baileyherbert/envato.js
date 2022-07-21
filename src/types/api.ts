@@ -132,7 +132,13 @@ export interface Item {
             type: string;
         },
         live_site ?: {
+            /**
+             * @deprecated The `url` field is not available except through search, but has been preserved for backwards
+             * compatibility. Please use the explicit `SearchItem` type if you need this field, as it will be removed
+             * in a future update.
+             */
             url: string;
+            href: string;
         },
         icon_preview ?: {
             icon_url: string;
@@ -141,6 +147,17 @@ export interface Item {
         landscape_preview ?: {
             landscape_url: string;
             image_urls ?: ItemImage[];
+        }
+    }
+};
+
+/**
+ * Full details about a marketplace item found in search results.
+ */
+export type SearchItem = Omit<Item, 'previews'> & {
+    previews: Omit<Item['previews'], 'live_site'> & {
+        live_site ?: {
+            url: string;
         }
     }
 };

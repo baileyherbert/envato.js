@@ -80,6 +80,12 @@ export interface Item {
         version: string;
         description: string;
     }
+    wordpress_plugin_metadata ?: {
+        plugin_name: string;
+        author?: string;
+        version?: string;
+        description?: string;
+    }
     rating: number;
     rating_count: number;
     published_at: Date;

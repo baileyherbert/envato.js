@@ -16,7 +16,7 @@ jobs:
         with:
           node-version: 16
           registry-url: 'https://registry.npmjs.org'
-      - run: npm install
+      - run: npm ci
       - run: npm run build
       - id: get_version
         uses: battila7/get-version-action@v2

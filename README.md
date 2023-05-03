@@ -1,8 +1,8 @@
 [![Envato.js](https://i.bailey.sh/pAEYtWD.png)](https://github.com/baileyherbert/envato.js)
 
 <p align="center">
-  <a aria-label="Build" href="https://travis-ci.org/baileyherbert/envato.js">
-    <img alt="" src="https://img.shields.io/travis/baileyherbert/envato.js?style=for-the-badge&labelColor=000000">
+  <a aria-label="Build" href="https://github.com/baileyherbert/envato.js/actions/workflows/test.yml">
+    <img alt="" src="https://img.shields.io/github/actions/workflow/status/baileyherbert/envato.js/test.yml?style=for-the-badge&labelColor=000000">
   </a>
   <a aria-label="NPM version" href="https://www.npmjs.com/package/envato">
     <img alt="" src="https://img.shields.io/npm/v/envato.svg?style=for-the-badge&labelColor=000000">

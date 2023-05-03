@@ -11,7 +11,8 @@ describe('client', () => {
     let client = new Client({
         token: 'a',
         refreshToken: 'b',
-        expiration: expiration
+        expiration: expiration,
+        userAgent: 'Envato.js Continuous Integration'
     });
 
     it('returns expected values', () => {
@@ -52,7 +53,8 @@ describe('client', () => {
 
 describe('personal client', () => {
     let client = new Client({
-        token: process.env.PERSONAL_TOKEN
+        token: process.env.PERSONAL_TOKEN,
+        userAgent: 'Envato.js Continuous Integration'
     });
 
     beforeEach((done) => {

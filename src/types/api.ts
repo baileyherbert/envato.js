@@ -163,6 +163,18 @@ export type SearchItem = Omit<Item, 'previews'> & {
 };
 
 /**
+ * Full details about a marketplace item found in the "more like this" response. The key differences for this object
+ * are that ratings are converted to an object, and active discounts are included.
+ */
+export type SimilarItem = Omit<Omit<Item, 'rating_count'>, 'rating'> & {
+    rating: {
+        rating: number;
+        count: number;
+    };
+    discounts: any[];
+};
+
+/**
  * An image resource used in items.
  */
 export interface ItemImage {

@@ -45,6 +45,7 @@ where possible, such as converting timestamps into `Date` objects.
     - [Look up a WordPress theme or plugin's version](#look-up-a-wordpress-theme-or-plugins-version)
     - [Search for items](#search-for-items)
     - [Search for comments](#search-for-comments)
+    - [Get more like this](#get-more-like-this)
     - [Get popular items by site](#get-popular-items-by-site)
     - [Get categories by site](#get-categories-by-site)
     - [Get prices for an item](#get-prices-for-an-item)
@@ -399,6 +400,20 @@ const response = await client.catalog.searchComments({
 
 console.log('Search took %d milliseconds', response.took);
 console.log('Found %d comments', response.matches.length);
+```
+
+#### Get more like this
+
+Returns similar items.
+
+```js
+const response = await client.catalog.getMoreLikeThis({
+    item_id: 123456,
+    page_size: 100,
+    page: 1
+});
+
+console.log('Similar items:', response.matches);
 ```
 
 #### Get popular items by site

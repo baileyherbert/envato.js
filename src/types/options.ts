@@ -219,6 +219,30 @@ export interface CommentSearchOptions {
     sort_by ?: 'relevance' | 'newest' | 'oldest';
 }
 
+/**
+ * Options used to search for similar items.
+ */
+export interface MoreLikeThisOptions {
+    /**
+     * The ID of the item to find similar items for.
+     */
+    item_id: number;
+
+    /**
+     * The page number (max. 60).
+     *
+     * @default 1
+     */
+    page?: number;
+
+    /**
+     * The number of items per page (max. 100).
+     *
+     * @default 100
+     */
+    page_size?: number;
+}
+
 // #endregion
 
 // #region author

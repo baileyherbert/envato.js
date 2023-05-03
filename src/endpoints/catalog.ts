@@ -1,6 +1,6 @@
 import { Client } from '../clients/client';
-import { ItemSearchOptions, CommentSearchOptions } from '../types/options';
-import { MarketName, Collection, Item, ItemConversation, ItemShort, ItemMedium, SearchItem } from '../types/api';
+import { ItemSearchOptions, CommentSearchOptions, MoreLikeThisOptions } from '../types/options';
+import { MarketName, Collection, Item, ItemConversation, ItemShort, ItemMedium, SearchItem, SimilarItem } from '../types/api';
 
 import url from '../util/url';
 import mutate from '../util/mutate';
@@ -142,6 +142,16 @@ export class CatalogEndpoints {
         );
     }
 
+    /**
+     * Find similar items.
+     *
+     * @param options The search options.
+     * @returns
+     */
+    public async getMoreLikeThis(options: MoreLikeThisOptions) : Promise<IMoreLikeThisResponse> {
+        return this._client.get(url.build('/v1/discovery/search/search/more_like_this', options));
+    }
+
 }
 
 export interface ICollectionResponse {
@@ -229,3 +239,35 @@ export interface IFeaturesResponse {
     }
     free_file: ItemMedium;
 };
+
+export interface IMoreLikeThisResponse {
+    /**
+     * The number of milliseconds it took for the request to complete or `null` when the target item is not found.
+     */
+	took: number | null;
+
+    /**
+     * The total number of similar items that are available.
+     */
+    total_hits: number;
+
+    /**
+     * An array of similar items.
+     */
+	matches: SimilarItem[];
+
+    /**
+     * The target item or `null` if not found.
+     */
+	item: Item | null;
+
+    /**
+     * Links for pagination.
+     */
+    links: {
+        next_page_url: string | null;
+        prev_page_url: string | null;
+        first_page_url: string;
+        last_page_url: string;
+    };
+}

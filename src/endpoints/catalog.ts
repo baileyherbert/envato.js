@@ -259,7 +259,7 @@ export interface IMoreLikeThisResponse {
     /**
      * The target item or `null` if not found.
      */
-	item: Item | null;
+	item: SimilarItem | null;
 
     /**
      * Links for pagination.

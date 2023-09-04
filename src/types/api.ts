@@ -171,8 +171,17 @@ export type SimilarItem = Omit<Omit<Item, 'rating_count'>, 'rating'> & {
         rating: number;
         count: number;
     };
-    discounts: any[];
+    discounts: ItemDiscount[];
 };
+
+export interface ItemDiscount {
+    original_price_cents: number;
+    sale_price_cents: number;
+    sale_starts_at: Date;
+    sale_ends_at: Date;
+    discount_cents: number;
+    discount_percent_rounded: number;
+}
 
 /**
  * An image resource used in items.

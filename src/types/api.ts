@@ -159,7 +159,8 @@ export type SearchItem = Omit<Item, 'previews'> & {
         live_site ?: {
             url: string;
         }
-    }
+    };
+    discounts: ItemDiscount[];
 };
 
 /**

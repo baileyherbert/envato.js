@@ -7,8 +7,9 @@
 
 		"target": "es6",
 		"lib": ["es6"],
+		"types": ["jest", "node"],
 
-		"declaration": true,
+		"declaration": false,
 		"declarationMap": false,
 		"sourceMap": true,
 
@@ -28,11 +29,12 @@
 		"importsNotUsedAsValues": "remove",
 
 		"skipLibCheck": true,
-		"stripInternal": true,
+		"stripInternal": false,
 		"removeComments": false,
+		"noEmit": true,
 
 		"newLine": "lf"
 	},
-	"include": ["src/**/*.ts"],
-	"exclude": ["node_modules", "lib", "tests"]
+	"include": ["**/*.ts", "../src/**/*.ts"],
+	"exclude": []
 }
